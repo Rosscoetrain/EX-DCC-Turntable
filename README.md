@@ -1,4 +1,13 @@
-# EX-Turntable
+# EX-DCC-Turntable
+
+This is intended to be an addon DCC controler for the DCC-EX EX-Turntable project.
+
+The majority of the code is from the EX-Turntable repo.
+
+Anything that has to do with DCC control is added by me.
+
+
+
 
 This README is a very brief summary, for the full documentation relating to EX-Turntable, please refer to the [DCC-EX Website](https://dcc-ex.com/).
 
