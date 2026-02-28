@@ -10,9 +10,9 @@
             "includePath": [
                 "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/include",
                 "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/src",
-                "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/StringSplitter/src",
                 "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/NmraDcc",
                 "/home/ross/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/AccelStepper/src",
                 "/home/ross/.platformio/packages/framework-arduino-avr/cores/arduino",
                 "/home/ross/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",
                 "/home/ross/.platformio/packages/framework-arduino-avr/libraries/HID/src",
@@ -26,9 +26,9 @@
                 "path": [
                     "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/include",
                     "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/src",
-                    "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/StringSplitter/src",
                     "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/NmraDcc",
                     "/home/ross/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                    "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/AccelStepper/src",
                     "/home/ross/.platformio/packages/framework-arduino-avr/cores/arduino",
                     "/home/ross/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",
                     "/home/ross/.platformio/packages/framework-arduino-avr/libraries/HID/src",
@@ -40,7 +40,6 @@
             },
             "defines": [
                 "PLATFORMIO=60119",
-                "ARDUINO_AVR_NANO",
                 "ARDUINO_AVR_NANO",
                 "F_CPU=16000000L",
                 "ARDUINO_ARCH_AVR",
