@@ -15,12 +15,12 @@
 // Define the Arduino input Pin number for the DCC Signal 
 #define DCC_PIN     2
 
-// The lines below define the pins used to connect to the A4988 driver module
-#define A4988_STEP_PIN      A0  //    4
-#define A4988_DIRECTION_PIN A1  //    5
-#define A4988_ENABLE_PIN    A2  //    6
+// The lines below define the pins used to connect to the TMC2209 driver module
+#define TMC2209_STEP_PIN      A0  //    4
+#define TMC2209_DIRECTION_PIN A1  //    5
+#define TMC2209_ENABLE_PIN    A2  //    6
 
-#ifdef A4988_ENABLE_PIN
+#ifdef TMC2209_ENABLE_PIN
 // Uncomment the next line to enable Powering-Off the Stepper when its not running to reduce heating the motor and driver
 #define DISABLE_OUTPUTS_IDLE
 #endif
@@ -47,7 +47,7 @@
 
 #define STEPS_PER_REVOLUTION (MOTOR_FULL_STEPS_PER_REVOLUTION * REDUCTION_GEARBOX_RATIO)
 
-// The A4988 Driver Board has 3 pins that set the Stepping Mode which are connected to 3 jumpers on the board. 
+// The TMC2209 Driver Board has 3 pins that set the Stepping Mode which are connected to 3 jumpers on the board. 
 // Uncomment the line below to match the Boards jumper setting        MS1,     MS2,     MS3
 // --------------------------------------------------------------------------------------------
 //#define FULL_TURN_STEPS (STEPS_PER_REVOLUTION)      // full steps - MS1=OFF, MS2=OFF, MS3=OFF

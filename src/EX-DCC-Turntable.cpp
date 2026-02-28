@@ -1,6 +1,21 @@
-// DCC Stepper Motor Controller ( A4988 ) Example for Model Railroad Turntable Control
+/*
+ *
+ * Ross Scanlon 2026
+ * 
+ * based on the example described below and EX-Turntable by Pete Cole 2023
+ * 
+ * Built for the RT_EX-Turntable all in one board available here:
+ * 
+ * https://rosscoe.com/shop/index.php?main_page=product_info&cPath=7&products_id=24
+ * 
+ * Uses TMC2209 stepper motor controller.
+ * 
+ * 
+ */
+
+// DCC Stepper Motor Controller ( TMC2209 ) Example for Model Railroad Turntable Control
 //
-// See: https://www.dccinterface.com/product/arduino-model-railway-dcc-stepper-motor-controller-a4988-assembled/
+// See: https://www.dccinterface.com/product/arduino-model-railway-dcc-stepper-motor-controller-TMC2209-assembled/
 // 
 // Author: Alex Shepherd 2020-06-01
 // 
@@ -15,6 +30,7 @@
 // Also checkout the artical I wrote in this project here:
 //         http://mrrwa.org/2017/12/23/dcc-controlled-turntable-stepper-motor-driver/ 
 //
+
 
 /*
  *

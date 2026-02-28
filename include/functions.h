@@ -28,7 +28,7 @@ void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower
       Serial.print(i, DEC);
       Serial.print(F(" @ Step: "));
 
-#ifdef A4988_ENABLE_PIN
+#ifdef TMC2209_ENABLE_PIN
       stepper.enableOutputs();
 #endif
 
@@ -77,16 +77,16 @@ void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower
 
 void setupStepperDriver()
 {
-#ifdef A4988_ENABLE_PIN
+#ifdef TMC2209_ENABLE_PIN
   stepper.setPinsInverted(false, false, true); // Its important that these commands are in this order
-  stepper.setEnablePin(A4988_ENABLE_PIN);    // otherwise the Outputs are NOT enabled initially
+  stepper.setEnablePin(TMC2209_ENABLE_PIN);    // otherwise the Outputs are NOT enabled initially
 #endif
    
   stepper.setMaxSpeed(STEPPER_MAX_SPEED);        // Sets the maximum permitted speed
   stepper.setAcceleration(STEPPER_ACCELARATION); // Sets the acceleration/deceleration rate
   stepper.setSpeed(STEPPER_SPEED);               // Sets the desired constant speed for use with runSpeed()
 
-#ifdef A4988_ENABLE_PIN
+#ifdef TMC2209_ENABLE_PIN
   stepper.enableOutputs();
 #endif
 
