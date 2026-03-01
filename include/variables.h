@@ -10,6 +10,7 @@
 #include <Arduino.h>
 
 #include "Led.h"
+#include "TtMover.h"
 
 struct CVPair
 {
@@ -495,13 +496,12 @@ CVPair FactoryDefaultCVs [] =
 uint8_t FactoryDefaultCVIndex = 0;
 
 // This structure holds the values for a turntable position with the DCC Address, Front Position in Steps from Home Sensor
-typedef struct
+struct TurnoutPosition
 {
   uint16_t dccAddress;
   uint32_t positionFront;
   uint32_t positionBack;
-}
-TurnoutPosition;
+};
 
 TurnoutPosition turnoutPositions[] = {
   {POSITION_01_DCC_ADDRESS + 0, POSITION_01 * 1, POSITION_01 * 1 + HALF_TURN_STEPS },
@@ -555,10 +555,14 @@ TurnoutPosition turnoutPositions[] = {
 
 };
 
+#define MAX_TURNOUT_POSITIONS (sizeof(turnoutPositions) / sizeof(TurnoutPosition))
 
 
 // Setup the AccelStepper object for the TMC2209 Stepper Motor Driver
 AccelStepper stepper(AccelStepper::DRIVER, TMC2209_STEP_PIN, TMC2209_DIRECTION_PIN);
+
+
+TtMover TTMover;
 
 // Dcc Accessory Decoder object
 NmraDcc  Dcc ;

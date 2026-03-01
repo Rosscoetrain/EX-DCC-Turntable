@@ -20,8 +20,8 @@ void setPhase(uint8_t phase) {
 #endif
 }
 
-
 void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower)
+
 {
   if (debug)
    {
@@ -317,6 +317,11 @@ void setupDCCDecoder()
   
   // Call the main DCC Init function to enable the DCC Receiver
   Dcc.init( MAN_ID_DIY, 10, CV29_ACCESSORY_DECODER, 0 );
+
+#ifdef USE_TT_MOVER
+  TTMover.init(100, stepper, Led);
+#endif
+
 }
 
 
@@ -673,7 +678,13 @@ void notifyDccAccTurnoutBoard (uint16_t BoardAddr, uint8_t OutputPair, uint8_t D
     MYSERIAL.print(',');
     MYSERIAL.println(OutputPower, HEX) ;
    }
+
+#ifndef USE_TT_MOVER
   processTurnoutCommand(Addr, Direction, OutputPower);
+#else
+  TTMover.addCommand(Addr, Direction, OutputPower);
+#endif
+
 };
 
 

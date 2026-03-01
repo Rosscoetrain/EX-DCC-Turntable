@@ -166,4 +166,7 @@
 #define CV_USER_ADDRESS 33
 
 
+// Use the TtMover class
+#define USE_TT_MOVER
+
 #endif
