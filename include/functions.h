@@ -7,13 +7,17 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-
+#include "defines.h"
+#include "Led.h"
 
 void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower)
 {
-  Serial.print(F("processTurnoutCommand: "));
-  Serial.print(F(" DCC address :"));
-  Serial.println(Addr);
+  if (debug)
+   {
+    MYSERIAL.print(F("processTurnoutCommand: "));
+    MYSERIAL.print(F(" DCC address :"));
+    MYSERIAL.println(Addr);
+   }
 
   for (uint8_t i = 0; i < MAX_TURNOUT_POSITIONS ; i++)
   {
@@ -21,12 +25,15 @@ void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower
     {
       lastAddr = Addr ;
       lastDirection = Direction ;
-      
-      Serial.print(F("Moving to "));
-      Serial.print(Direction ? F("Front") : F("Back"));
-      Serial.print(F(" Position: "));
-      Serial.print(i, DEC);
-      Serial.print(F(" @ Step: "));
+
+      if (debug)
+       {
+        MYSERIAL.print(F("Moving to "));
+        MYSERIAL.print(Direction ? F("Front") : F("Back"));
+        MYSERIAL.print(F(" Position: "));
+        MYSERIAL.print(i, DEC);
+        MYSERIAL.print(F(" @ Step: "));
+       }
 
 #ifdef TMC2209_ENABLE_PIN
       stepper.enableOutputs();
@@ -37,23 +44,33 @@ void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower
         newStep = turnoutPositions[i].positionFront;
       else
         newStep = turnoutPositions[i].positionBack;
+      if (debug)
+       {
+        MYSERIAL.print(newStep, DEC);
+        MYSERIAL.print(F("  Last Step: "));
+        MYSERIAL.print(lastStep, DEC);
+       }
 
-      Serial.print(newStep, DEC);
-      
-      Serial.print(F("  Last Step: "));
-      Serial.print(lastStep, DEC);
-      
       int diffStep = newStep - lastStep;
-      Serial.print(F("  Diff Step: "));
-      Serial.print(diffStep, DEC);
+      if (debug)
+       {
+        MYSERIAL.print(F("  Diff Step: "));
+        MYSERIAL.print(diffStep, DEC);
+       }
 
 #if defined ALWAYS_MOVE_POSITIVE
-      Serial.print(F("  Positive"));       
+      if (debug)
+       {
+        MYSERIAL.print(F("  Positive"));
+       }
       if(diffStep < 0)
         diffStep += FULL_TURN_STEPS;
         
 #elif defined ALWAYS_MOVE_NEGATIVE
-      Serial.print(F("  Negative"));       
+      if (debug)
+       {
+        MYSERIAL.print(F("  Negative"));
+       }
       if(diffStep > 0)
         diffStep -= FULL_TURN_STEPS;
 #else
@@ -64,16 +81,144 @@ void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower
         diffStep = diffStep + FULL_TURN_STEPS;
 #endif
 
-      Serial.print(F("  Move: "));
-      Serial.println(diffStep, DEC);
+      if (debug)
+       {
+        MYSERIAL.print(F("  Move: "));
+        MYSERIAL.println(diffStep, DEC);
+       }
       stepper.move(diffStep);
 
       lastStep = newStep;
       break;
     }
   }
+
+//  uint16_t addr = turnoutPositions[MAX_TURNOUT_POSITIONS - 1].dccAddress;
+  uint16_t addr = baseAddress + MAX_TURNOUT_POSITIONS;
+
+  if ((Addr >= addr) && (Addr < addr + EXTRA_DCC_ADDRESSES))
+   {
+    if (debug)
+     {
+      MYSERIAL.print(F("Addr : "));
+      MYSERIAL.println(Addr);
+     }
+
+// this is for led, acc and ext processing.
+    switch (Addr - addr)
+    {
+    case 1:
+      /* led off */
+      Led.state(LED_STATE_OFF);
+      break;
+    
+    case 2:
+      /* led on */
+      Led.state(LED_STATE_ON);
+      break;
+    
+    case 3:
+      /* led slow flash */
+      Led.state(LED_STATE_SLOW);
+      break;
+    
+    case 4:
+      /* led fast flash */
+      Led.state(LED_STATE_FAST);
+      break;
+    
+    case 5:
+      /* acc on */
+      digitalWrite(ACC_PIN, HIGH);
+      break;
+    
+    case 6:
+      /* acc off */
+      digitalWrite(ACC_PIN, LOW);
+      break;
+    
+    case 7:
+      /* ext1 on */
+      digitalWrite(EXT1_PIN, HIGH);
+      break;
+    
+    case 8:
+      /* ext1 off */
+      digitalWrite(EXT1_PIN, LOW);
+      break;
+    
+    case 9:
+      /* ext2 on */
+      digitalWrite(EXT2_PIN, HIGH);
+      break;
+    
+    case 10:
+      /* ext2 off */
+      digitalWrite(EXT2_PIN, LOW);
+      break;
+    
+    case 11:
+      /* ext3 on */
+      digitalWrite(EXT3_PIN, HIGH);
+      break;
+    
+    case 12:
+      /* ext3 off */
+      digitalWrite(EXT3_PIN, LOW);
+      break;
+    
+    case 13:
+      /* ext4 on */
+      digitalWrite(EXT4_PIN, HIGH);
+      break;
+    
+    case 14:
+      /* ext4 off */
+      digitalWrite(EXT4_PIN, LOW);
+      break;
+    
+    default:
+      break;
+    }
+   }
 }
 
+void setupPins()
+ {
+//  pinMode(LED_PIN, OUTPUT);
+  Led.init(LED_PIN);
+  pinMode(ACC_PIN, OUTPUT);
+  pinMode(EXT1_PIN, OUTPUT);
+  pinMode(EXT2_PIN, OUTPUT);
+  pinMode(EXT3_PIN, OUTPUT);
+  pinMode(EXT4_PIN, OUTPUT);
+
+//  digitalWrite(LED_PIN, LOW);
+  Led.state(LED_STATE_OFF);
+  digitalWrite(ACC_PIN, LOW);
+  digitalWrite(EXT1_PIN, LOW);
+  digitalWrite(EXT2_PIN, LOW);
+  digitalWrite(EXT3_PIN, LOW);
+  digitalWrite(EXT4_PIN, LOW);
+
+
+#if HOME_SENSOR_ACTIVE_STATE == LOW
+  pinMode(HOME_SENSOR_PIN, INPUT_PULLUP);
+#elif HOME_SENSOR_ACTIVE_STATE == HIGH
+  pinMode(HOME_SENSOR_PIN, INPUT);
+#endif
+
+#if TURNTABLE_EX_MODE == TRAVERSER
+// Configure limit sensor pin in traverser mode
+#if LIMIT_SENSOR_ACTIVE_STATE == LOW
+  pinMode(LIMIT_SENSOR_PIN, INPUT_PULLUP);
+#elif LIMIT_SENSOR_ACTIVE_STATE == HIGH
+  pinMode(LIMIT_SENSOR_PIN, INPUT);
+#endif
+#endif
+
+
+ }
 
 void setupStepperDriver()
 {
@@ -100,9 +245,7 @@ bool moveToHomePosition()
 #ifdef SKIP_HOME
   return true;
 #endif
-  Serial.println(F("Finding Home Sensor...."));
-
-  pinMode(HOME_SENSOR_PIN, INPUT_PULLUP);
+  MYSERIAL.println(F("Finding Home Sensor...."));
 
 #ifdef ALWAYS_MOVE_NEGATIVE
   stepper1.move(0 - (FULL_TURN_STEPS * 2));
@@ -116,18 +259,18 @@ bool moveToHomePosition()
   {
     stepper.stop();
     stepper.setCurrentPosition(0);
-    Serial.println(F("Found Home Position - Setting Current Position to 0"));
+    MYSERIAL.println(F("Found Home Position - Setting Current Position to 0"));
     return true;
   }
   else
-    Serial.println(F("Home Position NOT FOUND - Check Sensor Hardware"));
+    MYSERIAL.println(F("Home Position NOT FOUND - Check Sensor Hardware"));
 
   return false;  
 }
 
 void setupDCCDecoder()
 {
-  Serial.println(F("Setting up DCC Decorder..."));
+  MYSERIAL.println(F("Setting up DCC Decorder..."));
 
   // Setup which External Interrupt, the Pin it's associated with that we're using and enable the Pull-Up
   // Many Arduino Cores now support the digitalPinToInterrupt() function that makes it easier to figure out the
@@ -143,27 +286,14 @@ void setupDCCDecoder()
 }
 
 
-void notifyCVChange(uint16_t CV, uint8_t Value)
- {
-  Serial.print("notifyCVChange: CV: ") ;
-  Serial.print(CV,DEC) ;
-  Serial.print(" Value: ") ;
-  Serial.println(Value, DEC) ;
-
-  Value = Value;  // Silence Compiler Warnings...
- }
-
-
-
-
-
 
 void(* resetFunc) (void) = 0;                     // declare reset function at address 0
+
 
 // R soft reset
 void serialCommandR()
  {
-  Serial.println("Resetting");
+  MYSERIAL.println("Resetting");
   delay(2000);
   resetFunc();
  }
@@ -172,18 +302,18 @@ void serialCommandR()
 // M command to move
 void serialCommandM(long steps) {
   if (stepper.isRunning()) {
-    Serial.println(F("Stepper is running, ignoring <M>"));
+    MYSERIAL.println(F("Stepper is running, ignoring <M>"));
     return;
   }
   if (steps < 0) {
-    Serial.println(F("Cannot provide a negative step count"));
+    MYSERIAL.println(F("Cannot provide a negative step count"));
   } else if (steps > 32767) {
-    Serial.println(F("Step count too large, refer to the documentation for large step counts > 32767"));
+    MYSERIAL.println(F("Step count too large, refer to the documentation for large step counts > 32767"));
   } else {
-    Serial.print(F("Test move "));
-    Serial.print(steps);
-    Serial.print(F(" steps, activity ID "));
-    Serial.println(testActivity);
+    MYSERIAL.print(F("Test move "));
+    MYSERIAL.print(steps);
+    MYSERIAL.print(F(" steps, activity ID "));
+    MYSERIAL.println(testActivity);
 //    testStepsMSB = steps >> 8;
 //    testStepsLSB = steps & 0xFF;
 //    testCommandSent = true;
@@ -191,18 +321,18 @@ void serialCommandM(long steps) {
 
     uint8_t addr = (steps / (FULL_TURN_STEPS/24)) + POSITION_01_DCC_ADDRESS;
 
-    Serial.print(F(" addr "));
-    Serial.println(addr);
+    MYSERIAL.print(F(" addr "));
+    MYSERIAL.println(addr);
 
     processTurnoutCommand(addr, 1, 1);
-//    processTurnoutCommand(200, 0, 0);
   }
 }
 
-
+// reset to factory default CVs
 void serialCommandS()
  {
-  Serial.println(F("Reset factory default CVs"));
+  MYSERIAL.println(F("Reset factory default CVs"));
+//  Dcc.setCV(8, 8);
   notifyCVResetFactoryDefault();
  }
 
@@ -212,7 +342,7 @@ void serialCommandC()
  {
   if (stepper.isRunning())
    {
-    Serial.println(F("Stepper is running, ignoring <C>"));
+    MYSERIAL.println(F("Stepper is running, ignoring <C>"));
     return;
    }
 
@@ -227,6 +357,37 @@ void serialCommandC()
  }
 
 
+// toggle debug
+void serialCommandD()
+ {
+  debug = !debug;
+  MYSERIAL.println("Debug changed");
+ }
+
+
+void serialCommandE()
+ {
+  MYSERIAL.println("Erasing EEPROM...");
+  
+  // Loop through all EEPROM addresses and write 0 to each
+  for (int i = 0; i < EEPROM.length(); i++) {
+    EEPROM.write(i, 0xFF);
+  }
+  
+  MYSERIAL.println("EEPROM erased.");
+  // You can add a delay or turn on an LED to signal completion
+//  pinMode(13, OUTPUT);
+//  digitalWrite(13, HIGH); // LED on when done
+
+  for (int i = 0; i < EEPROM.length(); i++) {
+    MYSERIAL.print("i : ");
+    MYSERIAL.print(i);
+    MYSERIAL.print(" : 0x");
+    MYSERIAL.println(EEPROM.read(i), HEX);
+   }
+ }
+
+
 /*
 void serialCommand()
  {
@@ -237,26 +398,50 @@ void serialCommand()
 
 void showCVs()
  {
-  Serial.println(F("CVs are:"));
-  Serial.print(F("CV"));
-  Serial.print(CV_ACCESSORY_DECODER_ADDRESS_LSB);
-  Serial.print(F(" = "));
-  Serial.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_LSB));
-  Serial.print(F("CV"));
-  Serial.print(CV_ACCESSORY_DECODER_ADDRESS_MSB);
-  Serial.print(F(" = "));
-  Serial.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB));
-  Serial.print(F("CV"));
-  Serial.print(CV_29_CONFIG);
-  Serial.print(F(" = "));
-  Serial.println(Dcc.getCV(CV_29_CONFIG));
+  MYSERIAL.println(F("CVs are:"));
+  MYSERIAL.print(F("CV"));
+  MYSERIAL.print(CV_ACCESSORY_DECODER_ADDRESS_LSB);
+  MYSERIAL.print(F(" = "));
+  MYSERIAL.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_LSB));
+  MYSERIAL.print(F("CV"));
+  MYSERIAL.print(CV_ACCESSORY_DECODER_ADDRESS_MSB);
+  MYSERIAL.print(F(" = "));
+  MYSERIAL.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB));
+  MYSERIAL.print(F("CV"));
+  MYSERIAL.print(8);
+  MYSERIAL.print(F(" = "));
+  MYSERIAL.println(Dcc.getCV(8));
+  MYSERIAL.print(F("CV"));
+  MYSERIAL.print(CV_29_CONFIG);
+  MYSERIAL.print(F(" = "));
+  MYSERIAL.println(Dcc.getCV(CV_29_CONFIG));
+
+  for (int i = 0; i < 12; i++)
+   {
+    MYSERIAL.print(F("CV : "));
+    MYSERIAL.print(CV_USER_ADDRESS + i);
+    MYSERIAL.print(F(" = "));
+    MYSERIAL.println(Dcc.getCV(CV_USER_ADDRESS + i));
+   }
 
   for (int i = 0; i < MAX_TURNOUT_POSITIONS; i++)
    {
-    Serial.print(F("CV : "));
-    Serial.print(CV_USER_ADDRESS + (8 * i) + 10);
-    Serial.print(F(" = "));
-    Serial.println(Dcc.getCV(CV_USER_ADDRESS + (8 * i) + 10));
+    MYSERIAL.print(F("CV : "));
+    MYSERIAL.print(CV_USER_ADDRESS + (4 * i) + 12);
+    MYSERIAL.print(F(" = "));
+    MYSERIAL.print(Dcc.getCV(CV_USER_ADDRESS + (4 * i) + 12));
+    MYSERIAL.print(F(" CV : "));
+    MYSERIAL.print(CV_USER_ADDRESS + (4 * i) + 13);
+    MYSERIAL.print(F(" = "));
+    MYSERIAL.print(Dcc.getCV(CV_USER_ADDRESS + (4 * i) + 13));
+    MYSERIAL.print(F(" CV : "));
+    MYSERIAL.print(CV_USER_ADDRESS + (4 * i) + 14);
+    MYSERIAL.print(F(" = "));
+    MYSERIAL.print(Dcc.getCV(CV_USER_ADDRESS + (4 * i) + 14));
+    MYSERIAL.print(F(" CV : "));
+    MYSERIAL.print(CV_USER_ADDRESS + (4 * i) + 15);
+    MYSERIAL.print(F(" = "));
+    MYSERIAL.println(Dcc.getCV(CV_USER_ADDRESS + (4 * i) + 15));
    }
 
  }
@@ -269,8 +454,8 @@ void doSerialCommand()
   char startMarker = '<';
   char endMarker = '>';
   char serialChar;
-  while (Serial.available() > 0 && newSerialData == false) {
-    serialChar = Serial.read();
+  while (MYSERIAL.available() > 0 && newSerialData == false) {
+    serialChar = MYSERIAL.read();
     if (serialInProgress == true) {
       if (serialChar != endMarker) {
         serialInputChars[serialIndex] = serialChar;
@@ -306,11 +491,11 @@ void doSerialCommand()
         break;
       
       case 'D':
-//        serialCommandD();
+        serialCommandD();
         break;
       
       case 'E':
-//        serialCommandE();
+        serialCommandE();
         break;
 
       case 'H':
@@ -338,15 +523,17 @@ void doSerialCommand()
         break;
 
       case '?':
-        Serial.println("Commands are");
-        Serial.println(" C = Calibrate decoder");
-        Serial.println(" D = Enable/Disable debug");
-        Serial.println(" E = Erase EPROM contents");
-        Serial.println(" H = Initiate Homing");
-        Serial.println(" M = Move < steps activity>");
-        Serial.println(" R = Reset decoder");
-        Serial.println(" T = Enter/Exit sensor test mode");
-        Serial.println(" V = Display the startup information");
+        MYSERIAL.println("Commands are");
+//        MYSERIAL.println(" C = Calibrate decoder");
+        MYSERIAL.println(" D = Enable/Disable debug");
+//        MYSERIAL.println(" E = Erase EPROM contents");
+//        MYSERIAL.println(" H = Initiate Homing");
+        MYSERIAL.println(" M = Move < steps activity>");
+        MYSERIAL.println(" R = Reset decoder");
+//        MYSERIAL.println(" T = Enter/Exit sensor test mode");
+//        MYSERIAL.println(" V = Display the startup information");
+        MYSERIAL.println(" A = Show CVs");
+        MYSERIAL.println(" S = Reset CVs to default");
 
         break;
 
@@ -404,18 +591,19 @@ uint32_t getPosition(int i, bool rear)
  }
 
 
+
 void getAddresses()
  {
-  baseAddress = (((Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB) * 256) + Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_LSB) - 1) * 4) + 1  ;
+  baseAddress = (Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB) * 256) + Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_LSB);
 
-/*
-  Serial.print(F("MSB = "));
-  Serial.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB));
-  Serial.print(F("LSB = "));
-  Serial.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_LSB));
-  Serial.print(F("baseAddress = "));
-  Serial.print(baseAddress);
-*/
+
+  MYSERIAL.print(F("MSB = "));
+  MYSERIAL.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB));
+  MYSERIAL.print(F("LSB = "));
+  MYSERIAL.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_LSB));
+  MYSERIAL.print(F("baseAddress = "));
+  MYSERIAL.println(baseAddress);
+
 
   for (int i = 0; i < MAX_TURNOUT_POSITIONS; i++)
    {
@@ -432,14 +620,15 @@ void getAddresses()
 void notifyDccAccTurnoutBoard (uint16_t BoardAddr, uint8_t OutputPair, uint8_t Direction, uint8_t OutputPower)
 {
   uint16_t Addr = ((BoardAddr - 1) * 4) + OutputPair + 1;
-
-  Serial.print(F("notifyDccAccTurnoutBoard: "));
-  Serial.print(Addr,DEC) ;
-  Serial.print(',');
-  Serial.print(Direction,DEC) ;
-  Serial.print(',');
-  Serial.println(OutputPower, HEX) ;
-
+  if (debug)
+   {
+    MYSERIAL.print(F("notifyDccAccTurnoutBoard: "));
+    MYSERIAL.print(Addr,DEC) ;
+    MYSERIAL.print(',');
+    MYSERIAL.print(Direction,DEC) ;
+    MYSERIAL.print(',');
+    MYSERIAL.println(OutputPower, HEX) ;
+   }
   processTurnoutCommand(Addr, Direction, OutputPower);
 };
 
@@ -450,26 +639,43 @@ void notifyDccAccTurnoutBoard (uint16_t BoardAddr, uint8_t OutputPair, uint8_t D
 void notifyCVResetFactoryDefault()
  {
   FactoryDefaultCVIndex = sizeof(FactoryDefaultCVs)/sizeof(CVPair);
-  Serial.print("FactoryDefaultCVIndex : ");
-  Serial.println(FactoryDefaultCVIndex);
+  MYSERIAL.print("FactoryDefaultCVIndex : ");
+  MYSERIAL.println(FactoryDefaultCVIndex);
  }
+
+void notifyCVChange(uint16_t CV, uint8_t Value)
+ {
+  if (debug)
+   {
+    MYSERIAL.print("notifyCVChange: CV: ") ;
+    MYSERIAL.print(CV,DEC) ;
+    MYSERIAL.print(" Value: ") ;
+    MYSERIAL.println(Value, DEC) ;
+   }
+  Value = Value;  // Silence Compiler Warnings...
+
+  if ((CV == CV_ACCESSORY_DECODER_ADDRESS_MSB) || (CV == CV_ACCESSORY_DECODER_ADDRESS_LSB))
+   {
+    MYSERIAL.println("resetting decoder");
+    delay(1000);
+    resetFunc();
+   }
+		
+ }
+
 
 
 #ifdef  NOTIFY_DCC_MSG
 void notifyDccMsg( DCC_MSG * Msg)
 {
-  Serial.print("notifyDccMsg: ") ;
+  MYSERIAL.print("notifyDccMsg: ") ;
   for(uint8_t i = 0; i < Msg->Size; i++)
   {
-    Serial.print(Msg->Data[i], HEX);
-    Serial.write(' ');
+    MYSERIAL.print(Msg->Data[i], HEX);
+    MYSERIAL.write(' ');
   }
-  Serial.println();
+  MYSERIAL.println();
 }
 #endif
-
-
-
-
 
 #endif

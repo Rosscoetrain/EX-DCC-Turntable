@@ -44,6 +44,7 @@
  * 
  */
 
+#include <EEPROM.h>
 
 #include <AccelStepper.h>
 #include <NmraDcc.h>
@@ -53,6 +54,7 @@
 #include "defines.h"
 #include "variables.h"
 
+#include "Led.h"
 
 
 
@@ -71,53 +73,57 @@
 
 void setup()
 {
-  Serial.begin(115200);
+  MYSERIAL.begin(115200);
   uint8_t maxWaitLoops = 255;
   while(!Serial && maxWaitLoops--)  // Wait for the USB Device to Enumerate
     delay(20);
 
   setVersion();
 
-  Serial.println(F("DCC Turntable Control of RT_EX_Turntable board"));
-  Serial.print("Verion");
-  Serial.print(F("Version: "));
-  Serial.print(versionBuffer[0]);
-  Serial.print(F("."));
-  Serial.print(versionBuffer[1]);
-  Serial.print(F("."));
-  Serial.println(versionBuffer[2]);
-  Serial.println();  Serial.print(F("Full Rotation Steps: "));
-  Serial.println(FULL_TURN_STEPS);
+  MYSERIAL.println(F("DCC Turntable Control of RT_EX_Turntable board"));
+  MYSERIAL.print("Verion");
+  MYSERIAL.print(F("Version: "));
+  MYSERIAL.print(versionBuffer[0]);
+  MYSERIAL.print(F("."));
+  MYSERIAL.print(versionBuffer[1]);
+  MYSERIAL.print(F("."));
+  MYSERIAL.println(versionBuffer[2]);
+  MYSERIAL.println();  MYSERIAL.print(F("Full Rotation Steps: "));
+  MYSERIAL.println(FULL_TURN_STEPS);
 
-  Serial.print(F("Movement Strategy: "));
+  MYSERIAL.print(F("Movement Strategy: "));
 #if defined ALWAYS_MOVE_POSITIVE
-  Serial.println(F("Positive Direction Only"));
+  MYSERIAL.println(F("Positive Direction Only"));
 #elif defined ALWAYS_MOVE_NEGATIVE
-  Serial.println(F("Negative Direction Only"));
+  MYSERIAL.println(F("Negative Direction Only"));
 #else
-  Serial.println(F("Shortest Distance"));
+  MYSERIAL.println(F("Shortest Distance"));
 #endif
 
-
-  for(uint8_t i = 0; i < MAX_TURNOUT_POSITIONS; i++)
-  {
-    Serial.print(F("DCC Addr: "));
-    Serial.print(turnoutPositions[i].dccAddress);
-
-    Serial.print(F(" Front: "));
-    Serial.print(turnoutPositions[i].positionFront);
-
-    Serial.print(F(" Back: "));
-    Serial.println(turnoutPositions[i].positionBack);
-  }
-
+  setupPins();
 
   setupStepperDriver();
   if(moveToHomePosition())
   { 
     setupDCCDecoder();
 
-//    getAddresses();
+    getAddresses();
+
+
+    for(uint8_t i = 0; i < MAX_TURNOUT_POSITIONS; i++)
+     {
+      MYSERIAL.print(F("DCC Addr: "));
+      MYSERIAL.print(turnoutPositions[i].dccAddress);
+
+      MYSERIAL.print(F(" Front: "));
+      MYSERIAL.print(turnoutPositions[i].positionFront);
+
+      MYSERIAL.print(F(" Back: "));
+      MYSERIAL.println(turnoutPositions[i].positionBack);
+     }
+
+
+
 
     // Fake a DCC Packet to cause the Turntable to move to Position 1
     processTurnoutCommand(POSITION_01_DCC_ADDRESS, 1, 1);
@@ -128,6 +134,11 @@ void loop()
 {
   // You MUST call the NmraDcc.process() method frequently from the Arduino loop() function for correct library operation
   Dcc.process();
+  if( FactoryDefaultCVIndex && Dcc.isSetCVReady())
+   {
+    FactoryDefaultCVIndex--; // Decrement first as initially it is the size of the array 
+    Dcc.setCV( FactoryDefaultCVs[FactoryDefaultCVIndex].CV, FactoryDefaultCVs[FactoryDefaultCVIndex].Value);
+   }
 
   // Process the Stepper Library
   stepper.run();
@@ -139,10 +150,12 @@ void loop()
     if(!lastIsRunningState)
     {
       stepper.disableOutputs();
-      Serial.println(F("Disable Stepper Outputs"));
+      MYSERIAL.println(F("Disable Stepper Outputs"));
     }
   }
 #endif
+
+  Led.process();
 
 //#ifdef ENABLE_SERIAL
   doSerialCommand();

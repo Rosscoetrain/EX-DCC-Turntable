@@ -7,18 +7,85 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
-// Uncomment this to skip home sensor test
-//#define SKIP_HOME
+// If we haven't got a custom config.h, use the example.
+#if __has_include ( "config.h")
+  #include "config.h"
+  #ifndef TURNTABLE_EX_MODE
+  #error Your config.h must include a TURNTABLE_EX_MODE definition. If you see this warning in spite not having a config.h, you have a buggy preprocessor and must copy config.example.h to config.h
+  #endif
+#else
+  #warning config.h not found. Using defaults from config.example.h
+  #include "config.example.h"
+#endif
 
+// this is for other mcu that might use different serial for communication with serial terminal eg 4809 Curisoity nano
+#define MYSERIAL Serial
+
+// Uncomment this to skip home sensor position on startup
+//#define SKIP_HOME
 //
 
+#ifndef ESP32
 // Define the Arduino input Pin number for the DCC Signal 
 #define DCC_PIN     2
 
-// The lines below define the pins used to connect to the TMC2209 driver module
-#define TMC2209_STEP_PIN      A0  //    4
-#define TMC2209_DIRECTION_PIN A1  //    5
-#define TMC2209_ENABLE_PIN    A2  //    6
+// The lines below define the pins used to connect to the TMC2209 driver module to arduino nano
+#define TMC2209_STEP_PIN      A0
+#define TMC2209_DIRECTION_PIN A1
+#define TMC2209_ENABLE_PIN    A2
+
+// Home Position Sensor Input
+#define HOME_SENSOR_PIN 5
+
+// Limit Position Sensor Input
+#define LIMIT_SENSOR_PIN 8
+
+// Led pin
+#define LED_PIN 6
+
+// Acc pin
+#define ACC_PIN 7
+
+// Extra outputs
+#define EXT1_PIN 9
+#define EXT2_PIN 10
+#define EXT3_PIN 11
+#define EXT4_PIN 12
+
+#define EXTRA_DCC_ADDRESSES 14   // this is 4 for led, 2 for ACC and 2 for each EXT
+
+
+
+#else
+// The lines below define the pins used to connect to the TMC2209 driver module to ESP32
+
+// Define the Arduino input Pin number for the DCC Signal 
+#define DCC_PIN     4
+
+#define TMC2209_STEP_PIN      17
+#define TMC2209_DIRECTION_PIN 16
+#define TMC2209_ENABLE_PIN    18
+
+// Home Position Sensor Input
+#define HOME_SENSOR_PIN 26
+
+// Limit Position Sensor Input
+#define LIMIT_SENSOR_PIN 25
+
+// Led pin
+#define LED_PIN 32
+
+// Acc pin
+#define ACC_PIN 33
+
+// Extra outputs
+#define EXT1_PIN 14
+#define EXT2_PIN 13
+#define EXT3_PIN 15
+#define EXT4_PIN 19
+
+#endif
+
 
 #ifdef TMC2209_ENABLE_PIN
 // Uncomment the next line to enable Powering-Off the Stepper when its not running to reduce heating the motor and driver
@@ -96,5 +163,6 @@
 
 
 #define CV_USER_ADDRESS 33
+
 
 #endif
