@@ -629,14 +629,14 @@ uint32_t getPosition(int i, bool rear)
 void getAddresses()
  {
   baseAddress = (Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB) * 256) + Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_LSB);
-
+/*
   MYSERIAL.print(F("MSB = "));
   MYSERIAL.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB));
   MYSERIAL.print(F("LSB = "));
   MYSERIAL.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_LSB));
+*/
   MYSERIAL.print(F("baseAddress = "));
   MYSERIAL.println(baseAddress);
-
 
   for (int i = 0; i < MAX_TURNOUT_POSITIONS; i++)
    {
@@ -649,14 +649,14 @@ void getAddresses()
   phaseSwitchStartSteps = fullTurnSteps * 45 / 360;
   phaseSwitchStopSteps = fullTurnSteps - (fullTurnSteps * 45 / 360);
 
+/*
   MYSERIAL.print(F("fullTurnSteps : "));
   MYSERIAL.println(fullTurnSteps);
   MYSERIAL.print(F("phaseSwitchStartSteps : "));
   MYSERIAL.println(phaseSwitchStartSteps);
   MYSERIAL.print(F("phaseSwithchStopSteps : "));
   MYSERIAL.println(phaseSwitchStopSteps);
-
-
+*/
  }
 
 
