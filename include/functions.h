@@ -10,6 +10,17 @@
 #include "defines.h"
 #include "Led.h"
 
+
+// Function to set phase.
+void setPhase(uint8_t phase) {
+#if RELAY_ACTIVE_STATE == HIGH
+  digitalWrite(RELAY_PIN, phase);
+#elif RELAY_ACTIVE_STATE == LOW
+  digitalWrite(RELAY_PIN, !phase);
+#endif
+}
+
+
 void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower)
 {
   if (debug)
@@ -80,6 +91,26 @@ void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower
       else if(diffStep < -HALF_TURN_STEPS)
         diffStep = diffStep + FULL_TURN_STEPS;
 #endif
+
+
+#if PHASE_SWITCHING == AUTO
+    if ((newStep >= 0 && newStep < phaseSwitchStartSteps) || (newStep <= fullTurnSteps && newStep >= phaseSwitchStopSteps))
+     {
+      phaseSwitch = 0;
+     }
+    else
+     {
+      phaseSwitch = 1;
+     }
+#endif
+    if (debug)
+     {
+      Serial.print(F("Setting phase switch flag to: "));
+      Serial.println(phaseSwitch);
+     }
+    setPhase(phaseSwitch);
+
+
 
       if (debug)
        {
@@ -192,6 +223,7 @@ void setupPins()
   pinMode(EXT2_PIN, OUTPUT);
   pinMode(EXT3_PIN, OUTPUT);
   pinMode(EXT4_PIN, OUTPUT);
+  pinMode(RELAY_PIN, OUTPUT);
 
 //  digitalWrite(LED_PIN, LOW);
   Led.state(LED_STATE_OFF);
@@ -201,6 +233,8 @@ void setupPins()
   digitalWrite(EXT3_PIN, LOW);
   digitalWrite(EXT4_PIN, LOW);
 
+// setPhase and RELAY_PIN to off
+  setPhase(0);
 
 #if HOME_SENSOR_ACTIVE_STATE == LOW
   pinMode(HOME_SENSOR_PIN, INPUT_PULLUP);
@@ -596,7 +630,6 @@ void getAddresses()
  {
   baseAddress = (Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB) * 256) + Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_LSB);
 
-
   MYSERIAL.print(F("MSB = "));
   MYSERIAL.println(Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB));
   MYSERIAL.print(F("LSB = "));
@@ -611,6 +644,17 @@ void getAddresses()
     turnoutPositions[i].positionFront = getPosition(i, false);
     turnoutPositions[i].positionBack = getPosition(i, true);
    }
+
+  fullTurnSteps = (Dcc.getCV(CV_USER_ADDRESS + 2) * 256) + Dcc.getCV(CV_USER_ADDRESS + 1);
+  phaseSwitchStartSteps = fullTurnSteps * 45 / 360;
+  phaseSwitchStopSteps = fullTurnSteps - (fullTurnSteps * 45 / 360);
+
+  MYSERIAL.print(F("fullTurnSteps : "));
+  MYSERIAL.println(fullTurnSteps);
+  MYSERIAL.print(F("phaseSwitchStartSteps : "));
+  MYSERIAL.println(phaseSwitchStartSteps);
+  MYSERIAL.print(F("phaseSwithchStopSteps : "));
+  MYSERIAL.println(phaseSwitchStopSteps);
 
 
  }

@@ -51,16 +51,14 @@ CVPair FactoryDefaultCVs [] =
   {CV_ACCESSORY_DECODER_ADDRESS_MSB, 0},
   {CV_29_CONFIG, CV29_ACCESSORY_DECODER},
 
-// full turn steps
-// FULL_TURN_STEPS
-// allows for uint32_t number 
-//  ((FULL_TURN_STEPS >> 24) & 0xFF);
-//  ((FULL_TURN_STEPS >> 16) & 0xFF);
-//  ((FULL_TURN_STEPS >> 8) & 0xFF);
-//  (FULL_TURN_STEPS & 0xFF);
-
   {CV_USER_ADDRESS, 0x00},
   {CV_USER_ADDRESS + 1, 0x00},
+
+// full turn steps
+// FULL_TURN_STEPS
+// allows for uint16_t number 
+//  ((FULL_TURN_STEPS >> 8) & 0xFF);
+//  (FULL_TURN_STEPS & 0xFF);
 
   {CV_USER_ADDRESS + 2, ((FULL_TURN_STEPS >> 8) & 0xFF)},
   {CV_USER_ADDRESS + 3, (FULL_TURN_STEPS & 0xFF)},
@@ -570,11 +568,17 @@ uint16_t lastAddr = 0xFFFF ;
 uint8_t  lastDirection = 0xFF;
 uint16_t lastStep = 0;
 
+
+uint8_t phaseSwitch = 0;
+long phaseSwitchStartSteps;                         // Defines the step count at which phase should automatically invert.
+long phaseSwitchStopSteps;                          // Defines the step count at which phase should automatically revert.
+long fullTurnSteps;                                 // Assign our defined full turn steps from config.h.
+long halfTurnSteps;                                 // Defines a half turn to enable moving the least distance.
+
 //extern bool testCommandSent;    // Flag a test command has been sent via serial.
 //extern uint8_t testActivity;    // Activity sent via serial.
 //extern uint8_t testStepsMSB;
 //extern uint8_t testStepsLSB;
-//extern bool debug;
 //extern bool sensorTesting;
 
 unsigned long gearingFactor = REDUCTION_GEARBOX_RATIO;

@@ -54,6 +54,7 @@
 
 #define EXTRA_DCC_ADDRESSES 14   // this is 4 for led, 2 for ACC and 2 for each EXT
 
+#define RELAY_PIN 4
 
 
 #else
