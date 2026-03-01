@@ -49,13 +49,13 @@ class TtMover
     uint16_t startMs;
     uint16_t interval = 200;                    // time between checking for change of solenoid state
 
-    AccelStepper *stepper;
+    AccelStepper _stepper;
 //    TurnoutPosition *turnoutpositions;
-    LED *led;
+    LED _led;
 
 
   public:
-    void init(uint16_t interval, AccelStepper *stp, LED *Led);
+    void init(uint16_t interval, AccelStepper& stp, LED& Led);
     uint16_t addCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower);
     TT_State process(void);
 //    void initTurnoutPositions(TurnoutPosition *tp);

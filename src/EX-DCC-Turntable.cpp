@@ -56,6 +56,10 @@
 
 #include "Led.h"
 
+#ifdef USE_TT_MOVER
+#include "TtMover.h"
+TtMover TTMover;
+#endif
 
 
 // --------------------------------------------------------------------------------------------

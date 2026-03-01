@@ -5,21 +5,21 @@
  * 
  */
 
-#include "defines.h"
-#include "variables.h"
+//#include "defines.h"
+//#include "variables.h"
 
 #include "TtMover.h"
 
 
 #define TT_MOVER_SLOT_EMPTY 511
 
-void TtMover::init(uint16_t interval, AccelStepper *stp, LED *Led)
+void TtMover::init(uint16_t interval, AccelStepper& stp, LED& Led)
  {
   this->interval = interval;
   this->state = TT_IDLE;
-  this->stepper = stp;
+  this->_stepper = stp;
 //  this->turnoutpositions = tp;
-  this->led = Led;
+  this->_led = Led;
 
   for (int j = 0; j < TT_MOVER_MAX_TRACKS +  1; j++)
    {
@@ -95,7 +95,7 @@ TT_State TtMover::process(void)
  */
 
     case TT_MOVING:                           // continue moving until the target track is reached
-      if (this->stepper->isRunning())
+      if (this->_stepper.isRunning())
        {
         this->state = TT_MOVING;
        }
@@ -142,7 +142,7 @@ void TtMover::processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t Ou
 */
 
 #ifdef TMC2209_ENABLE_PIN
-      stepper->enableOutputs();
+      this->_stepper.enableOutputs();
 #endif
 
       int newStep;
@@ -224,7 +224,7 @@ void TtMover::processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t Ou
        }
 */
 
-      stepper->move(diffStep);
+      this->_stepper.move(diffStep);
 
       lastStep = newStep;
       break;

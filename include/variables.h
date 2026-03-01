@@ -8,9 +8,10 @@
 #define VARIABLES_H
 
 #include <Arduino.h>
+#include <NmraDcc.h>
 
 #include "Led.h"
-#include "TtMover.h"
+//#include "TtMover.h"
 
 struct CVPair
 {
@@ -560,9 +561,6 @@ TurnoutPosition turnoutPositions[] = {
 
 // Setup the AccelStepper object for the TMC2209 Stepper Motor Driver
 AccelStepper stepper(AccelStepper::DRIVER, TMC2209_STEP_PIN, TMC2209_DIRECTION_PIN);
-
-
-TtMover TTMover;
 
 // Dcc Accessory Decoder object
 NmraDcc  Dcc ;
