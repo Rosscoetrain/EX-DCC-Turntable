@@ -103,9 +103,9 @@
 //#define ALWAYS_MOVE_NEGATIVE
 
 // The lines below define the stepping speed and acceleration, which you may need to tune for your application
-#define STEPPER_MAX_SPEED     800   // Sets the maximum permitted speed
-#define STEPPER_ACCELARATION  1000  // Sets the acceleration/deceleration rate
-#define STEPPER_SPEED         300   // Sets the desired constant speed for use with runSpeed()
+//#define STEPPER_MAX_SPEED     800   // Sets the maximum permitted speed
+//#define STEPPER_ACCELARATION  1000  // Sets the acceleration/deceleration rate
+#define STEPPER_SPEED         200   // Sets the desired constant speed for use with runSpeed()
 
 // The line below defines the number of "Full Steps" your stepper motor does for a full rotation
 #define MOTOR_FULL_STEPS_PER_REVOLUTION 200

@@ -262,7 +262,7 @@ void setupStepperDriver()
 #endif
    
   stepper.setMaxSpeed(STEPPER_MAX_SPEED);        // Sets the maximum permitted speed
-  stepper.setAcceleration(STEPPER_ACCELARATION); // Sets the acceleration/deceleration rate
+  stepper.setAcceleration(STEPPER_ACCELERATION); // Sets the acceleration/deceleration rate
   stepper.setSpeed(STEPPER_SPEED);               // Sets the desired constant speed for use with runSpeed()
 
 #ifdef TMC2209_ENABLE_PIN
@@ -404,7 +404,7 @@ void serialCommandE()
   MYSERIAL.println("Erasing EEPROM...");
   
   // Loop through all EEPROM addresses and write 0 to each
-  for (int i = 0; i < EEPROM.length(); i++) {
+  for (uint16_t i = 0; i < EEPROM.length(); i++) {
     EEPROM.write(i, 0xFF);
   }
   
@@ -413,7 +413,7 @@ void serialCommandE()
 //  pinMode(13, OUTPUT);
 //  digitalWrite(13, HIGH); // LED on when done
 
-  for (int i = 0; i < EEPROM.length(); i++) {
+  for (uint16_t i = 0; i < EEPROM.length(); i++) {
     MYSERIAL.print("i : ");
     MYSERIAL.print(i);
     MYSERIAL.print(" : 0x");
@@ -458,7 +458,7 @@ void showCVs()
     MYSERIAL.println(Dcc.getCV(CV_USER_ADDRESS + i));
    }
 
-  for (int i = 0; i < MAX_TURNOUT_POSITIONS; i++)
+  for (uint8_t i = 0; i < MAX_TURNOUT_POSITIONS; i++)
    {
     MYSERIAL.print(F("CV : "));
     MYSERIAL.print(CV_USER_ADDRESS + (4 * i) + 12);
@@ -638,7 +638,7 @@ void getAddresses()
   MYSERIAL.print(F("baseAddress = "));
   MYSERIAL.println(baseAddress);
 
-  for (int i = 0; i < MAX_TURNOUT_POSITIONS; i++)
+  for (uint8_t i = 0; i < MAX_TURNOUT_POSITIONS; i++)
    {
     turnoutPositions[i].dccAddress = baseAddress + i;
     turnoutPositions[i].positionFront = getPosition(i, false);
