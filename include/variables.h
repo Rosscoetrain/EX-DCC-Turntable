@@ -611,4 +611,21 @@ uint16_t baseAddress;
 
 LED Led;
 
+
+/*
+ * struct and variables for commandQueue
+ */
+
+struct command
+ {
+  uint16_t addr;
+  uint8_t direction;
+  uint8_t outputpower;
+ };
+
+command commandQueue[NUMBER_OF_COMMANDS];
+
+bool commandActive = false;
+
+
 #endif

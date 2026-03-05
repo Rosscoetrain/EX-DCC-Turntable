@@ -103,13 +103,16 @@ void setup()
   setupPins();
 
   setupStepperDriver();
+
   if(moveToHomePosition())
   { 
     setupDCCDecoder();
 
     getAddresses();
 
+    setupCommandQueue();
 
+/*
     for(uint8_t i = 0; i < MAX_TURNOUT_POSITIONS; i++)
      {
       MYSERIAL.print(F("DCC Addr: "));
@@ -121,9 +124,7 @@ void setup()
       MYSERIAL.print(F(" Back: "));
       MYSERIAL.println(turnoutPositions[i].positionBack);
      }
-
-
-
+*/
 
     // Fake a DCC Packet to cause the Turntable to move to Position 1
     processTurnoutCommand(POSITION_01_DCC_ADDRESS, 1, 1);
@@ -143,7 +144,7 @@ void loop()
   // Process the Stepper Library
   stepper.run();
 
-#ifdef DISABLE_OUTPUTS_IDLE
+//#ifdef DISABLE_OUTPUTS_IDLE
   if(stepper.isRunning() != lastIsRunningState)
   {
     lastIsRunningState = stepper.isRunning();
@@ -151,11 +152,20 @@ void loop()
     {
       stepper.disableOutputs();
       MYSERIAL.println(F("Disable Stepper Outputs"));
+      commandActive = false;
     }
   }
-#endif
+//#endif
 
   Led.process();
+
+/*
+  if (!commandActive)
+   {
+    processCommandQueue();
+   }
+*/
+
 
 //#ifdef ENABLE_SERIAL
   doSerialCommand();

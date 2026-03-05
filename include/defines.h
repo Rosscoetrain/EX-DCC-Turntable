@@ -166,4 +166,8 @@
 #define CV_USER_ADDRESS 33
 
 
+#define NUMBER_OF_COMMANDS 5
+#define EMPTY_SLOT 1024
+
+
 #endif

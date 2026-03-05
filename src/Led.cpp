@@ -52,24 +52,6 @@ void LED::process()
  }
 
 
-/*
-void processLED() {
-  uint16_t currentMillis = millis();
-  if (ledState == 4 ) {
-    ledOutput = 1;
-  } else if (ledState == 7) {
-    ledOutput = 0;
-  } else if (ledState == 5 && currentMillis - ledMillis >= LED_SLOW) {
-    ledOutput = !ledOutput;
-    ledMillis = currentMillis;
-  } else if (ledState == 6 && currentMillis - ledMillis >= LED_FAST) {
-    ledOutput = !ledOutput;
-    ledMillis = currentMillis;
-  }
-  digitalWrite(ledPin, ledOutput);
-}
-*/
-
 
 
 void LED::state(LED_State state)
@@ -77,7 +59,7 @@ void LED::state(LED_State state)
   _state = state;
   if ((_state == LED_STATE_FAST) || (_state == LED_STATE_SLOW))
    {
-    _millisStart = millis();
+    _millisStart = 0;  // millis();
    }
 //  MYSERIAL.print(F("set Led State : "));
 //  MYSERIAL.println(_state);

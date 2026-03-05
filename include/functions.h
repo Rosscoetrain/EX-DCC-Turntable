@@ -23,6 +23,7 @@ void setPhase(uint8_t phase) {
 
 void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower)
 {
+  commandActive = true;
   if (debug)
    {
     MYSERIAL.print(F("processTurnoutCommand: "));
@@ -138,72 +139,72 @@ void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower
 // this is for led, acc and ext processing.
     switch (Addr - addr)
     {
-    case 1:
+    case 0:
       /* led off */
       Led.state(LED_STATE_OFF);
       break;
     
-    case 2:
+    case 1:
       /* led on */
       Led.state(LED_STATE_ON);
       break;
     
-    case 3:
+    case 2:
       /* led slow flash */
       Led.state(LED_STATE_SLOW);
       break;
     
-    case 4:
+    case 3:
       /* led fast flash */
       Led.state(LED_STATE_FAST);
       break;
     
-    case 5:
+    case 4:
       /* acc on */
       digitalWrite(ACC_PIN, HIGH);
       break;
     
-    case 6:
+    case 5:
       /* acc off */
       digitalWrite(ACC_PIN, LOW);
       break;
     
-    case 7:
+    case 6:
       /* ext1 on */
       digitalWrite(EXT1_PIN, HIGH);
       break;
     
-    case 8:
+    case 7:
       /* ext1 off */
       digitalWrite(EXT1_PIN, LOW);
       break;
     
-    case 9:
+    case 8:
       /* ext2 on */
       digitalWrite(EXT2_PIN, HIGH);
       break;
     
-    case 10:
+    case 9:
       /* ext2 off */
       digitalWrite(EXT2_PIN, LOW);
       break;
     
-    case 11:
+    case 10:
       /* ext3 on */
       digitalWrite(EXT3_PIN, HIGH);
       break;
     
-    case 12:
+    case 11:
       /* ext3 off */
       digitalWrite(EXT3_PIN, LOW);
       break;
     
-    case 13:
+    case 12:
       /* ext4 on */
       digitalWrite(EXT4_PIN, HIGH);
       break;
     
-    case 14:
+    case 13:
       /* ext4 off */
       digitalWrite(EXT4_PIN, LOW);
       break;
@@ -213,6 +214,95 @@ void processTurnoutCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower
     }
    }
 }
+
+/*
+ * command queue funtions
+ */
+
+void addCommand(uint16_t addr, uint8_t direction, uint8_t outputpower)
+ {
+  for (int i = 0; i < NUMBER_OF_COMMANDS; i++)
+   {
+    if (commandQueue[i].addr == addr)
+     {
+      return;
+     }
+   }
+  if (debug)
+   {
+    MYSERIAL.print(F("addCommand addr : "));
+    MYSERIAL.println(addr);
+    MYSERIAL.print(F("direction : "));
+    MYSERIAL.println(direction);
+    MYSERIAL.print(F("outputpower : "));
+    MYSERIAL.println(outputpower);
+   }
+  for (int i = 0; i < NUMBER_OF_COMMANDS; i++)
+   {
+    if (commandQueue[i].addr == EMPTY_SLOT)
+     {
+      commandQueue[i].addr = addr;
+      commandQueue[i].direction = direction;
+      commandQueue[i].outputpower = outputpower;
+      if (debug)
+       {
+        MYSERIAL.print(F("commandQueue.addr : "));
+        MYSERIAL.println(commandQueue[i].addr);
+       }
+      i = NUMBER_OF_COMMANDS;
+     }
+   }
+ }
+
+void setupCommandQueue()
+ {
+  for (int i = 0; i < NUMBER_OF_COMMANDS; i++)
+   {
+    commandQueue[i].addr = EMPTY_SLOT;
+    commandQueue[i].direction = 0;
+    commandQueue[i].outputpower = 0;
+   }
+ }
+
+void processCommandQueue()
+ {
+  if (stepper.isRunning())
+   {
+    return;
+   }
+  if ((commandQueue[0].addr != EMPTY_SLOT) && !commandActive)
+   {
+    commandActive = true;
+
+    uint16_t addr = commandQueue[0].addr;
+    uint8_t direction = commandQueue[0].direction;
+    uint8_t outputpower = commandQueue[0].outputpower;
+
+
+    if (debug)
+     {
+      MYSERIAL.print(F("processCommandQueue addr 0 : "));
+      MYSERIAL.println(commandQueue[0].addr);
+     }
+
+//    processTurnoutCommand(commandQueue[0].addr, commandQueue[0].direction, commandQueue[0].outputpower);
+
+    for (int i = 1; i < NUMBER_OF_COMMANDS; i++)
+     {
+      commandQueue[i - 1].addr = commandQueue[i].addr;
+      commandQueue[i - 1].direction = commandQueue[i].direction;
+      commandQueue[i - 1].outputpower = commandQueue[i].outputpower;
+     }
+    commandQueue[NUMBER_OF_COMMANDS - 1].addr = EMPTY_SLOT;
+    commandQueue[NUMBER_OF_COMMANDS - 1].direction = 0;
+    commandQueue[NUMBER_OF_COMMANDS - 1].outputpower = 0;
+
+    processTurnoutCommand(addr, direction, outputpower);
+
+   }
+ }
+
+
 
 void setupPins()
  {
@@ -250,9 +340,8 @@ void setupPins()
   pinMode(LIMIT_SENSOR_PIN, INPUT);
 #endif
 #endif
-
-
  }
+
 
 void setupStepperDriver()
 {
@@ -674,6 +763,7 @@ void notifyDccAccTurnoutBoard (uint16_t BoardAddr, uint8_t OutputPair, uint8_t D
     MYSERIAL.println(OutputPower, HEX) ;
    }
   processTurnoutCommand(Addr, Direction, OutputPower);
+//  addCommand(Addr, Direction, OutputPower);
 };
 
 
