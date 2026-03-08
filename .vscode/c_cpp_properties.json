@@ -10,6 +10,7 @@
             "includePath": [
                 "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/include",
                 "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/src",
+                "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/StringSplitter/src",
                 "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/NmraDcc",
                 "/home/ross/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
                 "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/AccelStepper/src",
@@ -26,6 +27,7 @@
                 "path": [
                     "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/include",
                     "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/src",
+                    "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/StringSplitter/src",
                     "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/NmraDcc",
                     "/home/ross/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
                     "/home/ross/data/Pictures/marklin/electronics/mine/rosscoetrain/RT-Software/RT_EX_Turntable/EX-DCC-Turntable/.pio/libdeps/nanoatmega328new/AccelStepper/src",
