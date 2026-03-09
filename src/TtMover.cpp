@@ -525,12 +525,106 @@ void TtMover::setPhase(bool phase)
  }
 
 
+// The calibration function is used to determine the number of steps required for a single 360 degree rotation,
+// or, in traverser mode, the steps between the home and limit switches.
+// This should only be trigged when either there are no stored steps in EEPROM, the stored steps are invalid,
+// or the calibration command has been initiated by the CommandStation.
+// Logic:
+// - Move away from home if already homed and erase EEPROM.
+// - Perform initial home rotation, set to 0 steps when homed.
+// - Perform second home rotation, set steps to currentPosition().
+// - Write steps to EEPROM.
+
 uint16_t TtMover::calibrate()
  {
-  
+  this->setPhase(0);
 
+  uint16_t tempSteps = 0;
 
+  bool homed = false;
 
+  this->enableOutputs();
 
-  return 0;
+#if TURNTABLE_EX_MODE == TURNTABLE
+  if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+   {
+    MYSERIAL.println(F("Homed"));
+    homed = true;
+    this->setCurrentPosition(0);
+   }
+
+  if (!homed)
+   {
+    if (digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE)
+     {
+      MYSERIAL.println(F("Homing ..."));
+     	this->moveTo(SANITY_STEPS);
+     }
+
+    while ((digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
+     {
+      this->run();
+     }
+
+    if ((digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() >= SANITY_STEPS))
+     {
+      MYSERIAL.println(F("Calibration incomplete"));
+      MYSERIAL.println(F("Home sensor not found"));
+      MYSERIAL.println(F("Full revolution steps unchanged"));
+      this->disableOutputs();
+      this->setCurrentPosition(0);
+      return 0;
+     }
+
+    if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+     {
+      MYSERIAL.println(F("Homed"));
+      homed = true;
+      this->setCurrentPosition(0);
+     }
+   }
+
+  MYSERIAL.println(F("Counting full steps"));
+
+  this->moveTo(HOME_SENSITIVITY);
+  while(digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+   {
+    this->run();
+   }
+
+ 	this->moveTo(SANITY_STEPS);
+  while ((digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
+   {
+    this->run();
+    tempSteps = this->currentPosition();
+    if (debug)
+     {
+      MYSERIAL.print(".");
+     }
+   }
+
+  if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+   {
+    MYSERIAL.println(F("Calibration complete"));
+    MYSERIAL.print(F("Full revolution steps : "));
+    MYSERIAL.println(tempSteps);
+    homed = true;
+    this->disableOutputs();
+    this->setCurrentPosition(0);
+   }
+  else
+   {
+    MYSERIAL.println(F("Calibration incomplete"));
+    MYSERIAL.println(F("Home sensor not found"));
+    MYSERIAL.println(F("Full revolution steps unchanged"));
+    homed = false;
+    tempSteps = 0;
+    this->disableOutputs();
+    this->setCurrentPosition(0);
+   }
+
+  return tempSteps;
+#endif
+
  }
+

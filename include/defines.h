@@ -22,29 +22,6 @@
 
 #define MYSERIAL Serial
 
-// to show all debug messages
-//#define DEBUG_MSG
-
-#ifdef DEBUG_MSG
-//#define DEBUG_MSG_1
-//#define DEBUG_MSG_2
-#endif
-
-// to show level 1 debug messages
-//#define DEBUG_MSG_1
-
-// to show level 2 debug messages
-//#define DEBUG_MSG_2
-
-// to show level 3 debug messages
-//#define DEBUG_MSG_3
-
-// to show level 4 debug messages
-//#define DEBUG_MSG_4
-
-// to show level 5 debug messages
-//#define DEBUG_MSG_5
-
 
 // Uncomment to print all DCC Packets
 //#define  NOTIFY_DCC_MSG
@@ -57,9 +34,11 @@
 //#define FORCE_RESET_FACTORY_DEFAULT_CV
 
 // Un-Comment the line below to Enable DCC ACK for Service Mode Programming Read CV Capablilty 
-// For reference only not usable in this decoder as all pins in use for sensors.
+// For reference only not usable in this decoder.
 //#define ENABLE_DCC_ACK  15  // This is A1 on the Iowa Scaled Engineering ARD-DCCSHIELD DCC Shield
 //#define DccAckPin ENABLE_DCC_ACK
+
+
 
 #define LEDCONTROL LED_BUILTIN
 
@@ -239,9 +218,6 @@
 #define SANITY_STEPS 30000
 
 #define HOME_SENSITIVITY 300
-
-//#define ALWAYS_MOVE_POSITIVE
-//#define ALWASY_MOVE_NEGATIVE
 
 
 /*

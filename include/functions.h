@@ -142,8 +142,10 @@ void doSerialCommand(String readString)
     uint16_t fts = ttMover.calibrate();
     if (fts)
      {
-      Dcc.setCV(CV_USER_ADDRESS + 2, ((fts >> 8) & 0xFF));
-      Dcc.setCV(CV_USER_ADDRESS + 3, fts & 0xFF);
+      MYSERIAL.println(F("Changing full revolution steps"));
+
+//      Dcc.setCV(CV_USER_ADDRESS + 2, ((fts >> 8) & 0xFF));
+//      Dcc.setCV(CV_USER_ADDRESS + 3, fts & 0xFF);
      }
    }
 
