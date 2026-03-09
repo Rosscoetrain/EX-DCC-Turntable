@@ -70,7 +70,7 @@ class TtMover : public AccelStepper
     uint16_t phaseSwitchStopSteps = 0;
 
 
-    bool debug = true;
+    bool debug = false;
 
     void InterpretCommand(uint16_t newcommand);
 

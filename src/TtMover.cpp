@@ -33,10 +33,11 @@ void TtMover::init(uint16_t interval)
 }
 
 uint16_t TtMover::addCommand(uint16_t command)
-{
-#ifdef DEBUG_MSG_4
-  MYSERIAL.print(" TtMover::addCommand: "); MYSERIAL.println(command,DEC);
-#endif
+ {
+  if (debug)
+   {
+    MYSERIAL.print(" TtMover::addCommand: "); MYSERIAL.println(command,DEC);
+   }
 
   for(uint8_t i = 0; i < TT_MOVER_MAX_TRACKS; i++)
   {
@@ -51,9 +52,11 @@ uint16_t TtMover::addCommand(uint16_t command)
 
     else if(commandQueue[i] == TT_MOVER_SLOT_EMPTY)
     {
-#ifdef DEBUG_MSG_4
-      MYSERIAL.print(" commandQueue Index: "); MYSERIAL.println(i,DEC);
-#endif
+     if (debug)
+      {
+        MYSERIAL.print(" commandQueue Index: "); MYSERIAL.println(i,DEC);
+      }
+
       this->commandQueue[i] = command;
       this->process();
       return i;
@@ -95,25 +98,24 @@ TT_State TtMover::process(void)
 
     case TT_MOVE:
 
-#ifdef DEBUG_MSG
-      MYSERIAL.print("TT_MOVE thisCommand = ");MYSERIAL.println(this->thisCommand);
-      MYSERIAL.print("TT_MOVE command = ");
-      this->InterpretCommand(this->thisCommand);
-      MYSERIAL.println(this->CommandName);
-#endif
-
-#ifdef DEBUG_MSG_4
-      MYSERIAL.print("thisCommand = ");MYSERIAL.println(this->thisCommand);
-#endif
+      if (debug)
+       {
+        MYSERIAL.print("TT_MOVE thisCommand = ");MYSERIAL.println(this->thisCommand);
+        MYSERIAL.print("TT_MOVE command = ");
+        this->InterpretCommand(this->thisCommand);
+        MYSERIAL.println(this->CommandName);
+       }
 
       this->direction = this->thisCommand - (int ( this->thisCommand / 10 ) * 10);
 
       this->Addr = (this->thisCommand - this->direction) / 10 + 1;
 
-#ifdef DEBUG_MSG_4
-      MYSERIAL.print("TT_MOVE Addr = ");MYSERIAL.println(this->Addr);
-      MYSERIAL.print("TT_MOVE direction = ");MYSERIAL.println(this->direction);
-#endif
+      if (debug)
+       {
+        MYSERIAL.print("TT_MOVE Addr = ");MYSERIAL.println(this->Addr);
+        MYSERIAL.print("TT_MOVE direction = ");MYSERIAL.println(this->direction);
+       }
+
 
   //GoTo commands
       if (( CMD_GOTO_1_CW <= this->thisCommand ) && ( this->thisCommand <= CMD_GOTO_48_ACW ))
@@ -286,10 +288,11 @@ TT_State TtMover::process(void)
       this->state = TT_STOP;
      }
 
-#ifdef DEBUG_MSG
-    MYSERIAL.print(" this->state: "); MYSERIAL.println(this->state);
-    MYSERIAL.print(" this->startMs: "); MYSERIAL.println(this->startMs);
-#endif
+    if (debug)
+     {
+      MYSERIAL.print(" this->state: "); MYSERIAL.println(this->state);
+      MYSERIAL.print(" this->startMs: "); MYSERIAL.println(this->startMs);
+     }
     break;
 
 /*
@@ -598,10 +601,11 @@ void TtMover::moveToHome()
 
 
 
-#ifdef DEBUG_MSG_5
-  MYSERIAL.print(F("lastStep : "));
-  MYSERIAL.println(lastStep);
-#endif
+  if (debug)
+   {
+    MYSERIAL.print(F("lastStep : "));
+    MYSERIAL.println(lastStep);
+   }
  }
 
 
