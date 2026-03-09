@@ -131,7 +131,8 @@ TT_State TtMover::process(void)
 
         this->enableOutputs();
 
-        uint16_t angleSteps = this->fullTurnSteps / NUM_TRACKS;
+//        uint16_t angleSteps = this->fullTurnSteps / NUM_TRACKS;
+        uint16_t angleSteps = this->fullTurnSteps / this->numOfTracks;
 
         uint16_t newStep;
         if (this->direction)
@@ -426,8 +427,15 @@ void TtMover::moveToHome()
   if (digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE)
    {
 
-    MYSERIAL.println("Homing ...");
-   	this->moveTo(SANITY_STEPS);
+    MYSERIAL.print(F("Homing "));
+#if TURNTABLE_EX_MODE == TURNTABLE
+    MYSERIAL.print(F("turntable"));
+    this->moveTo(SANITY_STEPS);
+#elif TURNTABLE_EX_MODE == TRAVERSER
+    MYSERIAL.print(F("traverser"));
+    this->moveTo(-SANITY_STEPS);
+#endif
+    MYSERIAL.println(F(" ..."));
    }
 
   while (digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE)
@@ -436,8 +444,6 @@ void TtMover::moveToHome()
   this->disableOutputs();
   this->lastStep = 0;
   this->setCurrentPosition(0);
-
-
 
   if (debug)
    {
@@ -509,9 +515,29 @@ void TtMover::setFullTurnSteps(uint8_t m, uint8_t l)
 
  }
 
+#if TURNTABLE_EX_MODE == TRAVERSER
+void TtMover::setNumOfTracks(uint8_t m)
+   {
+    this->numOfTracks = m;
+   }
+#endif
+
+
+
 void TtMover::setTrackAngle(uint8_t m, uint8_t l)
  {
+#if TURNTABLE_EX_MODE == TURNTABLE
   this->trackAngle = m * 256 + l;
+  this->numOfTracks = 360 * 10 / this->trackAngle;
+#elif TURNTABLE_EX_MODE == TRAVERSER
+  this->trackAngle = 0;
+#endif
+
+  if (this->debug)
+   {
+    MYSERIAL.print(F("Number of tracks : "));
+    MYSERIAL.println(this->numOfTracks);
+   }
  }
 
 

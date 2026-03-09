@@ -91,12 +91,18 @@ CVPair FactoryDefaultCVs [] =
   {CV_USER_ADDRESS + 4, ((DEFAULT_TRACK_ANGLE >> 8) & 0xFF)},   // MSB
   {CV_USER_ADDRESS + 5, (DEFAULT_TRACK_ANGLE & 0xFF)},   // LSB
 
-  // fast led flash rate / 10 ms  multiply by 10 to get actual ms
+// fast led flash rate / 10 ms  multiply by 10 to get actual ms
   {CV_USER_ADDRESS + 6, 10},
-  // slow led flash rate / 10 ms  multiply by 10 to get actual ms
+// slow led flash rate / 10 ms  multiply by 10 to get actual ms
   {CV_USER_ADDRESS + 7, 50},
 
+// number of tracks in traverser mode
+#if TURNTABLE_EX_MODE == TRAVERSER
+  {CV_USER_ADDRESS + 8, 0x05},
+#else
   {CV_USER_ADDRESS + 8, 0x00},
+#endif
+
   {CV_USER_ADDRESS + 9, 0x00},
   {CV_USER_ADDRESS + 10, 0x00},
   {CV_USER_ADDRESS + 11, 0x00},

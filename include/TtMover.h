@@ -56,6 +56,7 @@ class TtMover : public AccelStepper
     uint16_t trackOneBackward;
     uint16_t fullTurnSteps;
     uint16_t trackAngle;
+    uint8_t numOfTracks;
 
     bool lastIsRunningState = false;
 
@@ -67,7 +68,9 @@ class TtMover : public AccelStepper
     uint16_t phaseSwitchStartSteps = 0;
     uint16_t phaseSwitchStopSteps = 0;
 
-    bool debug = false;
+    bool debug = false;                 // this will only display debug messages in TtMover class
+
+
 
   public:
     TtMover();
@@ -82,6 +85,11 @@ class TtMover : public AccelStepper
     void setTrackOne(uint8_t mf, uint8_t lf, uint8_t mb, uint8_t lb);
     void setFullTurnSteps(uint8_t m, uint8_t l);
     void setTrackAngle(uint8_t m, uint8_t l);
+
+#if TURNTABLE_EX_MODE == TRAVERSER
+    void setNumOfTracks(uint8_t m);
+#endif
+
 
     uint16_t calibrate();
 

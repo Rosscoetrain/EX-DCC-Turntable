@@ -8,11 +8,14 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+#define TURNTABLE 0
+#define TRAVERSER 1
+
 // If we haven't got a custom config.h, use the example.
 #if __has_include ( "config.h")
   #include "config.h"
   #ifndef TURNTABLE_EX_MODE
-  #error Your config.h must include a TURNTABLE_MODE definition. If you see this warning in spite not having a config.h, you have a buggy preprocessor and must copy config.example.h to config.h
+  #error Your config.h must include a TURNTABLE_EX_MODE definition. If you see this warning in spite of having a config.h, you have a buggy preprocessor and must copy config.example.h to config.h
   #endif
 #else
   #warning config.h not found. Using defaults from config.example.h
@@ -57,7 +60,7 @@
 // define anti clockwise
 #define DIR_ACW !DIR_CW
 
-// Set the number of tracks
+// Set the number of tracks  THIS is only used to create other defines.  Actual number of tracks is determined by trackAngle CVs.
 #define NUM_TRACKS 48
 
 // Set the number of commands that are required.  This is number of tracks plus the other commands

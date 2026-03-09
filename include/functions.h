@@ -162,12 +162,17 @@ void doSerialCommand(String readString)
     MYSERIAL.println(F("Reset decoder to Factory Defaults: <F>"));
     MYSERIAL.println(F("Toggle debug output: <D>"));
 
+//    MYSERIAL.print(F("Turn on (1) off (0) Extra: <E [1 - 6] [0,1]"));
+
     MYSERIAL.print(F("Move to a track: <M [1 - "));
     MYSERIAL.print(NUM_TRACKS);
     MYSERIAL.println(F("]>"));
 
 //    MYSERIAL.println(F("Set track one steps: <S steps>"));
-//    MYSERIAL.println(F("Track separation angle: <T [0 - 3600]>"));
+    MYSERIAL.println(F("Track separation angle: <T [0 - 3600]>"));
+
+    MYSERIAL.println(F("Set led fast flash time: <FF  mS/10>"));
+    MYSERIAL.println(F("Set led slow flash time: <FS  mS/10>"));
 
 //    MYSERIAL.println(F("Set decoder output pulse time: <P  mS / 10>"));
 
@@ -201,6 +206,14 @@ void doSerialCommand(String readString)
       MYSERIAL.print(CV_29_CONFIG);
       MYSERIAL.print(F(" = "));
       MYSERIAL.println(Dcc.getCV(CV_29_CONFIG));
+
+      for (int i = 0; i < 16; i++)
+       {
+        MYSERIAL.print(F("CV"));
+        MYSERIAL.print(CV_USER_ADDRESS + i);
+        MYSERIAL.print(F(" = "));
+        MYSERIAL.println(Dcc.getCV(CV_USER_ADDRESS + i));
+       }
 
      }
     else
@@ -273,7 +286,7 @@ void doSerialCommand(String readString)
           splitter = NULL;
          }
 
-/*
+
         if (readString.startsWith("<T"))
          {
           StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
@@ -282,19 +295,96 @@ void doSerialCommand(String readString)
 
           if ( itemCount == 2)
            {
-            int addr = splitter->getItemAtIndex(1).toInt();
+            uint16_t angle = splitter->getItemAtIndex(1).toInt();
 
-            notifyDccAccTurnoutOutput( addr, 0, 1 );
-
+            if ((angle >= 0) && (angle <= 3600))
+             {
+              MYSERIAL.print(F("Set angle to : "));
+              MYSERIAL.print(angle / 10);
+              MYSERIAL.print(F("."));
+              MYSERIAL.print(angle % 10);
+              MYSERIAL.println(F(" deg"));
+              uint8_t m = ((angle >> 8)  & 0xFF);
+              Dcc.setCV(CV_USER_ADDRESS + 4, m);
+              m = angle & 0xFF;
+              Dcc.setCV(CV_USER_ADDRESS + 5, m);
+              MYSERIAL.println(F("<Z> to reset and activate new settings"));
+             }
+            else
+             {
+              MYSERIAL.println(F("Invalid angle: should be <T [0 - 3600]>"));
+             }
            }
           else
            {
-            MYSERIAL.println(F("Invalid command: should be <T address>"));
+            MYSERIAL.println(F("Invalid command: should be <T angle>"));
            }
           delete splitter;
           splitter = NULL;
          }
 
+
+        if (readString.startsWith("<FF"))
+         {
+          StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
+          int itemCount = splitter->getItemCount();
+
+          if ( itemCount == 2)
+           {
+            int addr = splitter->getItemAtIndex(1).toInt();
+
+#ifdef DEBUG_MSG
+            MYSERIAL.print(F("Value = ")); MYSERIAL.println(addr);
+#endif
+            if ((addr > 1) && (addr < 256))
+             {
+              Dcc.setCV(CV_USER_ADDRESS + 6, addr);
+             }
+            else
+             {
+              MYSERIAL.println(F("Invalid command: should be <FF [1-255]"));
+             }
+
+           }
+          else
+           {
+            MYSERIAL.println(F("Invalid command: should be <FF ms/10>"));
+           }
+          delete splitter;
+          splitter = NULL;
+         }
+
+        if (readString.startsWith("<FS"))
+         {
+          StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
+          int itemCount = splitter->getItemCount();
+
+          if ( itemCount == 2)
+           {
+            int addr = splitter->getItemAtIndex(1).toInt();
+
+#ifdef DEBUG_MSG
+            MYSERIAL.print(F("Value = ")); MYSERIAL.println(addr);
+#endif
+            if ((addr > 1) && (addr < 256))
+             {
+              Dcc.setCV(CV_USER_ADDRESS + 7, addr);
+             }
+            else
+             {
+              MYSERIAL.println(F("Invalid command: should be <FS [1-255]"));
+             }
+
+           }
+          else
+           {
+            MYSERIAL.println(F("Invalid command: should be <FS ms/10>"));
+           }
+          delete splitter;
+          splitter = NULL;
+         }
+
+/*
         if (readString.startsWith("<P"))
          {
           StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)

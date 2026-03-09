@@ -1,6 +1,7 @@
 /*
- * This is an accessory decoder to control the Marklin 7186 turntable.
+ * This is an accessory decoder to control the RT_EX-Turntable board.
  * 
+ * The board is available here:
  * 
  * 
  */
@@ -61,6 +62,11 @@ void setup()
   ttMover.setFullTurnSteps(Dcc.getCV(CV_USER_ADDRESS + 2), Dcc.getCV(CV_USER_ADDRESS + 3));
   ttMover.setTrackAngle(Dcc.getCV(CV_USER_ADDRESS + 4), Dcc.getCV(CV_USER_ADDRESS + 5));
 
+#if TURNTABLE_EX_MODE == TRAVERSER
+  ttMover.setNumOfTracks(Dcc.getCV(CV_USER_ADDRESS + 8));
+#endif
+
+
 
 #ifdef FORCE_RESET_FACTORY_DEFAULT_CV
   MYSERIAL.println("Resetting CVs to Factory Defaults");
@@ -69,7 +75,13 @@ void setup()
 
 BaseTurnoutAddress = (((Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_MSB) * 256) + Dcc.getCV(CV_ACCESSORY_DECODER_ADDRESS_LSB) - 1) * 4) + 1  ;
 
-  MYSERIAL.print("Rosscoe Train Turntable Decoder stepper motor: ");Serial.println(DCC_DECODER_VERSION_NUM,DEC);
+  MYSERIAL.print(F("Rosscoe Train"));
+#if TURNTABLE_EX_MODE == TURNTABLE
+  MYSERIAL.print(F(" Turntable "));
+#elif TURNTABLE_EX_MODE == TRAVERSER
+  MYSERIAL.print(F(" Traverser "));
+#endif
+  MYSERIAL.print(F(" decoder: "));Serial.println(DCC_DECODER_VERSION_NUM,DEC);
   MYSERIAL.print("DCC Base Address: "); Serial.println(BaseTurnoutAddress, DEC);
   MYSERIAL.print(F("Version: "));
   MYSERIAL.print(versionBuffer[0]);

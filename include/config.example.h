@@ -21,12 +21,12 @@
 
 /////////////////////////////////////////////////////////////////////////////////////
 //  Define the mode for turntable or traverser
-//  TURNTABLE : Use this for normal, 360 degree rotation turntables (Default).
-//  TRAVERSER : Use this for vertical or horizontal traversers, or turntables that do
+//  0 = TURNTABLE : Use this for normal, 360 degree rotation turntables (Default).
+//  1 = TRAVERSER : Use this for vertical or horizontal traversers, or turntables that do
 //              do not rotate a full 360 degrees.
 // 
-#define TURNTABLE_EX_MODE TURNTABLE
-// #define TURNTABLE_EX_MODE TRAVERSER
+#define TURNTABLE_EX_MODE 0 // TURNTABLE
+//#define TURNTABLE_EX_MODE 1 // TRAVERSER
 
 
 /*
