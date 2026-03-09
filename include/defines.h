@@ -11,7 +11,7 @@
 // If we haven't got a custom config.h, use the example.
 #if __has_include ( "config.h")
   #include "config.h"
-  #ifndef TURNTABLE_MODE
+  #ifndef TURNTABLE_EX_MODE
   #error Your config.h must include a TURNTABLE_MODE definition. If you see this warning in spite not having a config.h, you have a buggy preprocessor and must copy config.example.h to config.h
   #endif
 #else

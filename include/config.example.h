@@ -7,18 +7,26 @@
 
 /*
  *
- *  Configuration options do be determined.
+ *  Configuration options to be determined.
  *  Some items from defines.h will be moved here.
  * 
  */
 
-// change or add to this to define which serial to use
 
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// change or add to this to define which serial to use for console output
 #define MYSERIAL Serial
 
+/////////////////////////////////////////////////////////////////////////////////////
+//  Define the mode for turntable or traverser
+//  TURNTABLE : Use this for normal, 360 degree rotation turntables (Default).
+//  TRAVERSER : Use this for vertical or horizontal traversers, or turntables that do
+//              do not rotate a full 360 degrees.
+// 
+#define TURNTABLE_EX_MODE TURNTABLE
+// #define TURNTABLE_EX_MODE TRAVERSER
 
 
 /*
