@@ -168,18 +168,24 @@ void doSerialCommand(String readString)
     MYSERIAL.print(NUM_TRACKS);
     MYSERIAL.println(F("]>"));
 
-//    MYSERIAL.println(F("Set track one steps: <S steps>"));
+    MYSERIAL.println(F("Move this number of steps: <S (-)steps>"));
     MYSERIAL.println(F("Track separation angle: <T [0 - 3600]>"));
 
-    MYSERIAL.println(F("Set led fast flash time: <FF  mS/10>"));
-    MYSERIAL.println(F("Set led slow flash time: <FS  mS/10>"));
-
-//    MYSERIAL.println(F("Set decoder output pulse time: <P  mS / 10>"));
+    MYSERIAL.println(F("Set led fast flash time: <FF mS/10>"));
+    MYSERIAL.println(F("Set led slow flash time: <FS mS/10>"));
 
     MYSERIAL.println(F("Calibrate steps per revolution: <C>"));
 
+
+    MYSERIAL.println(F("Set led slow flash time: <FS  mS/10>"));
+
+
     MYSERIAL.println(F("Show current CVs: <>"));
     MYSERIAL.println(F("Soft Reset: <Z>"));
+
+#if TURNTABLE_EX_MODE == TRAVERSER
+    MYSERIAL.println(F("Set traverser number of tracks: <TT number>"));
+#endif
 
    }
   else
@@ -354,6 +360,8 @@ void doSerialCommand(String readString)
           splitter = NULL;
          }
 
+// set led slow flash rate in ms / 10
+
         if (readString.startsWith("<FS"))
          {
           StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
@@ -384,8 +392,9 @@ void doSerialCommand(String readString)
           splitter = NULL;
          }
 
-/*
-        if (readString.startsWith("<P"))
+// set track one steps
+
+        if (readString.startsWith("<T1"))
          {
           StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
           int itemCount = splitter->getItemCount();
@@ -397,19 +406,120 @@ void doSerialCommand(String readString)
 #ifdef DEBUG_MSG
             MYSERIAL.print(F("Value = ")); MYSERIAL.println(addr);
 #endif
-
-            Dcc.setCV(CV_ACCESSORY_DECODER_WAIT_TIME, addr);
+            if ((addr > 1) && (addr < 256))
+             {
+              Dcc.setCV(CV_USER_ADDRESS + 7, addr);
+             }
+            else
+             {
+              MYSERIAL.println(F("Invalid command: should be <T1 [1 - FULL_TURN_STEPS]"));
+             }
 
            }
           else
            {
-            MYSERIAL.println(F("Invalid command: should be <P ms/10>"));
+            MYSERIAL.println(F("Invalid command: should be <T1 (number of steps)>"));
            }
           delete splitter;
           splitter = NULL;
-          resetFunc();
          }
-*/
+
+
+#if TURNTABLE_EX_MODE == TRAVERSER
+        if (readString.startsWith("<TT"))
+         {
+          StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
+          int itemCount = splitter->getItemCount();
+
+          if ( itemCount == 2)
+           {
+            int addr = splitter->getItemAtIndex(1).toInt();
+
+#ifdef DEBUG_MSG
+            MYSERIAL.print(F("Value = ")); MYSERIAL.println(addr);
+#endif
+            if ((addr > 1) && (addr < 256))
+             {
+              Dcc.setCV(CV_USER_ADDRESS + 8, addr);
+             }
+            else
+             {
+              MYSERIAL.println(F("Invalid command: should be <TT [1-255]"));
+             }
+
+           }
+          else
+           {
+            MYSERIAL.println(F("Invalid command: should be <TT [1-255]>"));
+           }
+          delete splitter;
+          splitter = NULL;
+         }
+
+#endif
+
+// move a number of steps
+
+        if (readString.startsWith("<S"))
+         {
+          StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
+          int itemCount = splitter->getItemCount();
+
+          if ( itemCount == 2)
+           {
+            int steps = splitter->getItemAtIndex(1).toInt();
+            int endStep = 0;
+
+            if ((steps >= -100) && (steps <= 100))
+             {
+              MYSERIAL.print(F("Start step position : "));
+              MYSERIAL.println(ttMover.currentPosition());
+
+              if (ttMover.currentPosition() + steps < 0)
+               {
+                endStep = ttMover.getFullTurnSteps() + (ttMover.currentPosition() + steps);
+               }
+              else
+               {
+                if (ttMover.currentPosition() + steps > ttMover.getFullTurnSteps())
+                 {
+                  endStep = (ttMover.currentPosition() + steps) - ttMover.getFullTurnSteps();
+                 }
+                else
+                 {
+                  endStep = ttMover.currentPosition() + steps;
+                 }
+               }
+              if (debug)
+               {
+                MYSERIAL.print(F("end step : "));
+                MYSERIAL.println(endStep);
+               }
+              ttMover.enableOutputs();
+              uint16_t currentStep = ttMover.currentPosition();
+              ttMover.moveTo(endStep);
+              while (ttMover.currentPosition() != endStep)
+               {
+                ttMover.run();
+               }
+              ttMover.disableOutputs();
+              MYSERIAL.print(F("At step : "));
+              MYSERIAL.println(ttMover.currentPosition(), DEC);
+
+             }
+            else
+             {
+              MYSERIAL.println(F("Invalid steps: should be <S [-100 to 100]>"));
+             }
+           }
+          else
+           {
+            MYSERIAL.println(F("Invalid command: should be <S [-100 - 100]>"));
+           }
+          delete splitter;
+          splitter = NULL;
+         }
+
 
        }
       else

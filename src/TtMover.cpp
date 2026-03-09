@@ -512,7 +512,11 @@ void TtMover::setFullTurnSteps(uint8_t m, uint8_t l)
     MYSERIAL.print(F("phaseSwitchStopSteps : "));
     MYSERIAL.println(this->phaseSwitchStopSteps);
    }
+ }
 
+uint16_t TtMover::getFullTurnSteps()
+ {
+  return this->fullTurnSteps;
  }
 
 #if TURNTABLE_EX_MODE == TRAVERSER

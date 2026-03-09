@@ -84,6 +84,7 @@ class TtMover : public AccelStepper
 
     void setTrackOne(uint8_t mf, uint8_t lf, uint8_t mb, uint8_t lb);
     void setFullTurnSteps(uint8_t m, uint8_t l);
+    uint16_t getFullTurnSteps();
     void setTrackAngle(uint8_t m, uint8_t l);
 
 #if TURNTABLE_EX_MODE == TRAVERSER
