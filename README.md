@@ -19,7 +19,7 @@ EX-DCC-Turntable is a DCC turntable controller, using an Arduino microcontroller
 
 - Interactive commands via the serial console for debugging and testing
 - DCC signal phase switching to align bridge track phase with layout phase
-- Operates in either turntable or traverser mode
+- Operates in either turntable or traverser mode (traverser mode not yet tested 9 March 2026)
 - Operates as a group of turnouts.  This to be rectified when DCC-EX corrects the addressing error in Turntables.cpp
 
 
