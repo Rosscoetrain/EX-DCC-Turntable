@@ -626,5 +626,87 @@ uint16_t TtMover::calibrate()
   return tempSteps;
 #endif
 
+#if TURNTABLE_EX_MODE == TRAVERSER
+  if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+   {
+    MYSERIAL.println(F("Homed"));
+    homed = true;
+    this->setCurrentPosition(0);
+   }
+
+  if (!homed)
+   {
+    if (digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE)
+     {
+      MYSERIAL.println(F("Homing ..."));
+     	this->moveTo(-SANITY_STEPS);
+     }
+
+    while ((digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() >= -SANITY_STEPS))
+     {
+      this->run();
+     }
+
+    if ((digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() >= -SANITY_STEPS))
+     {
+      MYSERIAL.println(F("Calibration incomplete"));
+      MYSERIAL.println(F("Home sensor not found"));
+      MYSERIAL.println(F("Full revolution steps unchanged"));
+      this->disableOutputs();
+      this->setCurrentPosition(0);
+      return 0;
+     }
+
+    if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+     {
+      MYSERIAL.println(F("Homed"));
+      homed = true;
+      this->setCurrentPosition(0);
+     }
+   }
+
+  MYSERIAL.println(F("Counting full steps"));
+
+  this->moveTo(HOME_SENSITIVITY);
+  while(digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+   {
+    this->run();
+   }
+
+ 	this->moveTo(SANITY_STEPS);
+  while ((digitalRead(LIMIT_SENSOR_PIN) != LIMIT_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
+   {
+    this->run();
+    tempSteps = this->currentPosition();
+    if (debug)
+     {
+      MYSERIAL.print(".");
+     }
+   }
+
+  if (digitalRead(LIMIT_SENSOR_PIN) == LIMIT_SENSOR_ACTIVE_STATE)
+   {
+    MYSERIAL.println(F("Calibration complete"));
+    MYSERIAL.print(F("Full steps : "));
+    MYSERIAL.println(tempSteps);
+    homed = true;
+    this->disableOutputs();
+    this->setCurrentPosition(0);
+   }
+  else
+   {
+    MYSERIAL.println(F("Calibration incomplete"));
+    MYSERIAL.println(F("Limit sensor not found"));
+    MYSERIAL.println(F("Full steps unchanged"));
+    homed = false;
+    tempSteps = 0;
+    this->disableOutputs();
+    this->setCurrentPosition(0);
+   }
+
+  return tempSteps;
+
+#endif
+
  }
 

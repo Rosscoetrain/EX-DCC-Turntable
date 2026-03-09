@@ -142,10 +142,13 @@ void doSerialCommand(String readString)
     uint16_t fts = ttMover.calibrate();
     if (fts)
      {
-      MYSERIAL.println(F("Changing full revolution steps"));
+      MYSERIAL.print(F("Changing full revolution steps to "));
+      MYSERIAL.println(fts);
 
-//      Dcc.setCV(CV_USER_ADDRESS + 2, ((fts >> 8) & 0xFF));
-//      Dcc.setCV(CV_USER_ADDRESS + 3, fts & 0xFF);
+      Dcc.setCV(CV_USER_ADDRESS + 2, ((fts >> 8) & 0xFF));
+      Dcc.setCV(CV_USER_ADDRESS + 3, fts & 0xFF);
+
+      MYSERIAL.println(F("<Z> to reset and activate new settings"));
      }
    }
 
@@ -159,9 +162,13 @@ void doSerialCommand(String readString)
     MYSERIAL.println(F("Reset decoder to Factory Defaults: <F>"));
     MYSERIAL.println(F("Toggle debug output: <D>"));
 
-//    MYSERIAL.println(F("Move to a track: <M address>"));
-//    MYSERIAL.println(F("Close an address: <C address>"));
-//    MYSERIAL.println(F("Throw an address: <T address>"));
+    MYSERIAL.print(F("Move to a track: <M [1 - "));
+    MYSERIAL.print(NUM_TRACKS);
+    MYSERIAL.println(F("]>"));
+
+//    MYSERIAL.println(F("Set track one steps: <S steps>"));
+//    MYSERIAL.println(F("Track separation angle: <T [0 - 3600]>"));
+
 //    MYSERIAL.println(F("Set decoder output pulse time: <P  mS / 10>"));
 
     MYSERIAL.println(F("Calibrate steps per revolution: <C>"));
@@ -202,11 +209,11 @@ void doSerialCommand(String readString)
        {
         // this is where commands are completed
 
-        // command to close turnout <M address>
+        // command to move to track <M track>
 
         if (readString.startsWith("<M"))
          {
-/*
+
           StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
           int itemCount = splitter->getItemCount();
 
@@ -214,42 +221,24 @@ void doSerialCommand(String readString)
            {
             int addr = splitter->getItemAtIndex(1).toInt();
 
-            notifyDccAccTurnoutOutput( addr, 1, 1 );
+            if ((addr > 0) && (addr <= NUM_TRACKS))
+             {
+              notifyDccAccTurnoutOutput( BaseTurnoutAddress + addr - 1, 1, 1 );
+             }
+            else
+             {
+              MYSERIAL.println(F("Invalid track number"));
+             }
 
            }
           else
            {
-                        MYSERIAL.println(F("Invalid command: should be <C address>"));
+                        MYSERIAL.println(F("Invalid command: should be <M track>"));
            }
           delete splitter;
           splitter = NULL;
-*/
+
          }
-
-
-         // command to throw turnout <T address>
-/*
-        if (readString.startsWith("<T"))
-         {
-          StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
-          int itemCount = splitter->getItemCount();
-
-
-          if ( itemCount == 2)
-           {
-            int addr = splitter->getItemAtIndex(1).toInt();
-
-            notifyDccAccTurnoutOutput( addr, 0, 1 );
-
-           }
-          else
-           {
-            MYSERIAL.println(F("Invalid command: should be <T address>"));
-           }
-          delete splitter;
-          splitter = NULL;
-         }
-*/
 
          // command to set address <A address>
          // address will be adjusted to the correct base turnout address
@@ -285,6 +274,27 @@ void doSerialCommand(String readString)
          }
 
 /*
+        if (readString.startsWith("<T"))
+         {
+          StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
+          int itemCount = splitter->getItemCount();
+
+
+          if ( itemCount == 2)
+           {
+            int addr = splitter->getItemAtIndex(1).toInt();
+
+            notifyDccAccTurnoutOutput( addr, 0, 1 );
+
+           }
+          else
+           {
+            MYSERIAL.println(F("Invalid command: should be <T address>"));
+           }
+          delete splitter;
+          splitter = NULL;
+         }
+
         if (readString.startsWith("<P"))
          {
           StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
