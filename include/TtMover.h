@@ -43,8 +43,6 @@ class TtMover : public AccelStepper
     byte direction, lastDirection;
     uint16_t Addr;
 
-    String CommandName;
-
     uint16_t startMs;
     uint16_t interval = 200;                    // time between checking for change of solenoid state
 
@@ -69,10 +67,7 @@ class TtMover : public AccelStepper
     uint16_t phaseSwitchStartSteps = 0;
     uint16_t phaseSwitchStopSteps = 0;
 
-
     bool debug = false;
-
-    void InterpretCommand(uint16_t newcommand);
 
   public:
     TtMover();
@@ -87,7 +82,6 @@ class TtMover : public AccelStepper
     void setTrackOne(uint8_t mf, uint8_t lf, uint8_t mb, uint8_t lb);
     void setFullTurnSteps(uint8_t m, uint8_t l);
     void setTrackAngle(uint8_t m, uint8_t l);
-
 
     uint16_t calibrate();
 
