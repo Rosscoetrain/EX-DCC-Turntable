@@ -259,6 +259,53 @@ void doSerialCommand(String readString)
 
          }
 
+// command to activate led, acc or ext outputs
+// <E p 0/1>
+// p = 49 - 55
+// 0 = off 1 = on
+//
+// 49 led off / on
+// 50 led flash slow/flash fast
+// 51 acc on / off
+// 52 ext1 off / on
+// 53 ext2 off / on
+// 54 ext3 off / on
+// 55 ext4 off / on
+// 
+//
+
+        if (readString.startsWith("<E"))
+         {
+
+          StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
+          int itemCount = splitter->getItemCount();
+
+          if ( itemCount == 3)
+           {
+            int addr = splitter->getItemAtIndex(1).toInt();
+            int onOff = splitter->getItemAtIndex(2).toInt();
+
+            if ((addr > NUM_TRACKS) && (addr <= NUM_TRACKS + 7) && ((onOff == 0) || (onOff == 1)))
+             {
+              notifyDccAccTurnoutOutput( BaseTurnoutAddress + addr - 1, onOff, 1 );
+             }
+            else
+             {
+              MYSERIAL.println(F("Invalid address number or on/off"));
+             }
+           }
+          else
+           {
+            MYSERIAL.println(F("Invalid command: should be <E [49 - 55] 0/1>"));
+           }
+          delete splitter;
+          splitter = NULL;
+
+         }
+
+
+
+
          // command to set address <A address>
          // address will be adjusted to the correct base turnout address
          // eg if address is 2 this will be corrected to 1 as the address are groups of 8 with an offset of 4
