@@ -265,7 +265,7 @@ void doSerialCommand(String readString)
 // 0 = off 1 = on
 //
 // 49 led off / on
-// 50 led flash slow/flash fast
+// 50 led flash fast/flash slow
 // 51 acc on / off
 // 52 ext1 off / on
 // 53 ext2 off / on
@@ -543,7 +543,7 @@ void doSerialCommand(String readString)
                 MYSERIAL.println(endStep);
                }
               ttMover.enableOutputs();
-              uint16_t currentStep = ttMover.currentPosition();
+//              uint16_t currentStep = ttMover.currentPosition();
               ttMover.moveTo(endStep);
               while (ttMover.currentPosition() != endStep)
                {

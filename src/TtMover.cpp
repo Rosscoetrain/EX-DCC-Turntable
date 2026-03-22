@@ -131,7 +131,6 @@ TT_State TtMover::process(void)
 
         this->enableOutputs();
 
-//        uint16_t angleSteps = this->fullTurnSteps / NUM_TRACKS;
         uint16_t angleSteps = this->fullTurnSteps / this->numOfTracks;
 
         uint16_t newStep;
@@ -230,7 +229,7 @@ TT_State TtMover::process(void)
 
 // on off commands
 
-    if ((this->thisCommand >= CMD_LED_ON ) && ( this->thisCommand <= CMD_EXT4_OFF ))
+    if ((this->thisCommand >= CMD_LED_OFF ) && ( this->thisCommand <= CMD_EXT4_ON ))
      {
       switch (this->thisCommand)
        {

@@ -74,6 +74,9 @@
 
 #define CMD_GOTO_1_CW 1
 #define CMD_GOTO_1_ACW 2
+
+/* these are not required just kept here for reference */
+/*
 #define CMD_GOTO_2_CW 11
 #define CMD_GOTO_2_ACW 12
 #define CMD_GOTO_3_CW 21
@@ -166,25 +169,26 @@
 #define CMD_GOTO_46_ACW 452
 #define CMD_GOTO_47_CW 461
 #define CMD_GOTO_47_ACW 462
+*/
 #define CMD_GOTO_48_CW 471
 #define CMD_GOTO_48_ACW 472
 
-#define CMD_LED_ON 481
-#define CMD_LED_OFF 482
+#define CMD_LED_OFF 481
+#define CMD_LED_ON 482
 #define CMD_LED_SLOW 491
 #define CMD_LED_FAST 492
 
-#define CMD_ACC_ON 501
-#define CMD_ACC_OFF 502
+#define CMD_ACC_OFF 501
+#define CMD_ACC_ON 502
 
-#define CMD_EXT1_ON 511
-#define CMD_EXT1_OFF 512
-#define CMD_EXT2_ON 521
-#define CMD_EXT2_OFF 522
-#define CMD_EXT3_ON 531
-#define CMD_EXT3_OFF 532
-#define CMD_EXT4_ON 541
-#define CMD_EXT4_OFF 542
+#define CMD_EXT1_OFF 511
+#define CMD_EXT1_ON 512
+#define CMD_EXT2_OFF 521
+#define CMD_EXT2_ON 522
+#define CMD_EXT3_OFF 531
+#define CMD_EXT3_ON 532
+#define CMD_EXT4_OFF 541
+#define CMD_EXT4_ON 542
 
 
 /*

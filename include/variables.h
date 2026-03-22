@@ -116,7 +116,7 @@ CVPair FactoryDefaultCVs [] =
   {CV_USER_ADDRESS + 14, (((POSITION_01 * 1 + HALF_TURN_STEPS) >> 8)  & 0xFF)},
   {CV_USER_ADDRESS + 15, ((POSITION_01 * 1 + HALF_TURN_STEPS) & 0xFF)},
 
-// track 1 defined in config.example others calculated by using track angle cvs.
+// track 1 defined in config.example.h others calculated by using track angle cvs.
 
 
 };
