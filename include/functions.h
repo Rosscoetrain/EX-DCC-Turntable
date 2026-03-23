@@ -59,20 +59,28 @@ void setCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower)
      }
 
 #ifdef DUAL_MOTOR
-    if(( Addr >= BaseTurnoutAddress + NUM_COMMANDS ) && ( Addr < (BaseTurnoutAddress + NUM_COMMANDS * 2 )) && OutputPower )
+    if(( Addr >= BaseTurnoutAddress + NUM_COMMANDS ) && ( Addr < (BaseTurnoutAddress + NUM_COMMANDS + NUM_COMMANDS )) && OutputPower )
      {
-      if (debug)
-       {
+//      if (debug)
+//       {
+#ifdef DEBUG_MSG_1
         MYSERIAL.print(F("addr: "));MYSERIAL.println(Addr);
         MYSERIAL.print(F("baseTurnoutAddr: "));MYSERIAL.println(BaseTurnoutAddress);
-       }
+        MYSERIAL.print(F("before addr: "));
+        MYSERIAL.println(Addr);
+        MYSERIAL.print(F("NUM_COMMANDS : "));
+        MYSERIAL.println(NUM_COMMANDS);
+        MYSERIAL.print(F("NUM_COMMANDS * 2 : "));
+        MYSERIAL.println(NUM_COMMANDS + NUM_COMMANDS);
+#endif
+//       }
 
 // Direction = 1 move clockwise
 // Direction = 0 move anti-clockwise
 
-      thisCommand = (((Addr - BaseTurnoutAddress) * 10) + 1) + Direction;
+      thisCommand = (((Addr - (BaseTurnoutAddress + NUM_COMMANDS)) * 10) + 1) + Direction;
 
-      ttMover.addCommand(thisCommand);
+      ttMover2.addCommand(thisCommand);
 
 #ifdef DEBUG_MSG_1
       MYSERIAL.println("");
@@ -82,9 +90,7 @@ void setCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower)
 
      }
 
-
 #endif
-
 
    }
 

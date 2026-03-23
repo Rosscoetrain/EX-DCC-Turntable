@@ -65,7 +65,7 @@
 
 // Set the number of commands that are required.  This is number of tracks plus the other commands
 
-#define NUM_COMMANDS NUM_TRACKS + 12
+#define NUM_COMMANDS NUM_TRACKS + 14
 
 // Define learning button if it's not defined then applicable functions are not included.
 //#define LEARN_BUTTON A7

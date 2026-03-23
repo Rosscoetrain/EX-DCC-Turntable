@@ -59,9 +59,14 @@ uint16_t TtMover::addCommand(uint16_t command)
       {
         MYSERIAL.print(" commandQueue Index: "); MYSERIAL.println(i,DEC);
       }
-
       this->commandQueue[i] = command;
       this->process();
+
+#ifdef DEBUG_MSG_1
+        MYSERIAL.print(F("command : "));
+        MYSERIAL.println(command);
+#endif
+
       return i;
     }
   }  
