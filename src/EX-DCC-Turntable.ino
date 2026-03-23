@@ -47,20 +47,38 @@ void setup()
   // Many Arduino Cores now support the digitalPinToInterrupt() function that makes it easier to figure out the
   // Interrupt Number for the Arduino Pin number, which reduces confusion. 
 
+#ifndef GRBL
 #ifdef digitalPinToInterrupt
   Dcc.pin(DCC_PIN, 0);
 #else
   Dcc.pin(0, DCC_PIN, 1);
 #endif
+#endif
 
   // Call the main DCC Init function to enable the DCC Receiver
   Dcc.init( MAN_ID_DIY, DCC_DECODER_VERSION_NUM, CV29_ACCESSORY_DECODER | CV29_OUTPUT_ADDRESS_MODE, 0 );
 
+  ttMover.setHomeLimitPin(HOME_SENSOR_PIN, LIMIT_SENSOR_PIN);
+  ttMover.setInvert(INVERT_DIRECTION, INVERT_STEP, INVERT_ENABLE);
 
   ttMover.init(Dcc.getCV(CV_ACCESSORY_DECODER_WAIT_TIME) * 10);
+  ttMover.enableOutputs();
+
   ttMover.setTrackOne(Dcc.getCV(CV_USER_ADDRESS + 12), Dcc.getCV(CV_USER_ADDRESS + 13), Dcc.getCV(CV_USER_ADDRESS + 14), Dcc.getCV(CV_USER_ADDRESS + 15));
   ttMover.setFullTurnSteps(Dcc.getCV(CV_USER_ADDRESS + 2), Dcc.getCV(CV_USER_ADDRESS + 3));
   ttMover.setTrackAngle(Dcc.getCV(CV_USER_ADDRESS + 4), Dcc.getCV(CV_USER_ADDRESS + 5));
+
+#ifdef DUAL_MOTOR
+  ttMover2.setHomeLimitPin(HOME_SENSOR_2_PIN, LIMIT_SENSOR_2_PIN);
+  ttMover2.setInvert(INVERT_DIRECTION_2, INVERT_STEP_2, INVERT_ENABLE_2);
+
+  ttMover2.init(Dcc.getCV(CV_ACCESSORY_DECODER_WAIT_TIME) * 10);
+  ttMover2.enableOutputs();
+
+  ttMover2.setTrackOne(Dcc.getCV(CV_USER_ADDRESS + 32), Dcc.getCV(CV_USER_ADDRESS + 33), Dcc.getCV(CV_USER_ADDRESS + 34), Dcc.getCV(CV_USER_ADDRESS + 35));
+  ttMover2.setFullTurnSteps(Dcc.getCV(CV_USER_ADDRESS + 22), Dcc.getCV(CV_USER_ADDRESS + 23));
+  ttMover2.setTrackAngle(Dcc.getCV(CV_USER_ADDRESS + 24), Dcc.getCV(CV_USER_ADDRESS + 25));
+#endif
 
 #if TURNTABLE_EX_MODE == TRAVERSER
   ttMover.setNumOfTracks(Dcc.getCV(CV_USER_ADDRESS + 8));
@@ -111,6 +129,10 @@ void loop()
 
   ttMover.process();
   ttMover.processLed();
+
+#ifdef DUAL_MOTOR
+  ttMover2.process();
+#endif
 
 
 #ifdef LEARNING_BUTTON

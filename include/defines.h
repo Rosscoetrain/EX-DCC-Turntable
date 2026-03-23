@@ -196,11 +196,22 @@
  *  TMC2209 driver pins
  * 
  */
-
+#ifdef GRBL
+#define TMC2209_STEP_PIN  5
+#define TMC2209_DIRECTION_PIN 2
+#define TMC2209_ENABLE_PIN 8
+#ifdef DUAL_MOTOR
+#define TMC2209_2_STEP_PIN  6
+#define TMC2209_2_DIRECTION_PIN 3
+#define TMC2209_2_ENABLE_PIN 8
+#endif
+#else
 #define TMC2209_STEP_PIN  A0
 #define TMC2209_DIRECTION_PIN A1
 #define TMC2209_ENABLE_PIN A2
-
+#ifdef DUAL_MOTOR
+#endif
+#endif
 
 /*
  *
@@ -208,7 +219,7 @@
  * 
  */
 
-#define STEPPER_MAX_SPEED 800
+#define STEPPER_MAX_SPEED 400
 #define STEPPER_ACCELERATION 100
 #define STEPPER_SPEED 200
 
@@ -224,7 +235,7 @@
 
 #define SANITY_STEPS 30000
 
-#define HOME_SENSITIVITY 300
+#define HOME_SENSITIVITY 600
 
 
 /*
@@ -250,6 +261,22 @@
  * 
  */
 
+#ifdef GRBL
+#define HOME_SENSOR_PIN A0
+#define LIMIT_SENSOR_PIN A1
+#define LED_PIN 13
+#define ACC_PIN A2
+#define EXT1_PIN 9
+#define EXT2_PIN 10
+#ifdef DUAL_MOTOR
+#define HOME_SENSOR_2_PIN 11
+#define LIMIT_SENSOR_2_PIN 12
+#else
+#define EXT3_PIN 11
+#define EXT4_PIN 12
+#endif
+#define RELAY_PIN A3
+#else
 #define HOME_SENSOR_PIN 5
 #define LIMIT_SENSOR_PIN 8
 
@@ -261,7 +288,7 @@
 #define EXT4_PIN 12
 
 #define RELAY_PIN 4
-
+#endif
 
 
 /*
@@ -270,8 +297,6 @@
 
 #define LED_SLOW 500
 #define LED_FAST 100
-
-
 
 /*
  *

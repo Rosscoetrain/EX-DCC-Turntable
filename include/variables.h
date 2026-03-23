@@ -19,7 +19,11 @@ uint16_t thisCommand = 0;
 // buffer to hold serial commands
 String readString;
 
-TtMover ttMover;
+TtMover ttMover(AccelStepper::DRIVER, TMC2209_STEP_PIN, TMC2209_DIRECTION_PIN, 0, 0, false);
+#ifdef DUAL_MOTOR
+TtMover ttMover2(AccelStepper::DRIVER, TMC2209_2_STEP_PIN, TMC2209_2_DIRECTION_PIN, 0, 0, false);
+#endif
+
 
 char* version;
 uint8_t versionBuffer[3];
@@ -117,6 +121,38 @@ CVPair FactoryDefaultCVs [] =
   {CV_USER_ADDRESS + 15, ((POSITION_01 * 1 + HALF_TURN_STEPS) & 0xFF)},
 
 // track 1 defined in config.example.h others calculated by using track angle cvs.
+
+
+#ifdef DUAL_MOTOR
+// full turn steps
+// FULL_TURN_STEPS
+// allows for uint16_t number 
+//  ((FULL_TURN_STEPS >> 8) & 0xFF);
+//  (FULL_TURN_STEPS & 0xFF);
+
+  {CV_USER_ADDRESS + 22, ((FULL_TURN_STEPS >> 8) & 0xFF)},   // MSB
+  {CV_USER_ADDRESS + 23, (FULL_TURN_STEPS & 0xFF)},          // LSB
+
+
+// angle between tracks * 10.  divide by 10 to get actual angle
+// allows for uint16_t number
+// value is 0-3600
+//  ((DEFAULT_TRACK_ANGLE >> 8) & 0xFF);
+//  (DEFAULT_TRACK_ANGLE & 0xFF);
+
+  {CV_USER_ADDRESS + 24, ((DEFAULT_TRACK_ANGLE >> 8) & 0xFF)},   // MSB
+  {CV_USER_ADDRESS + 25, (DEFAULT_TRACK_ANGLE & 0xFF)},   // LSB
+// track 1
+// front position steps
+  {CV_USER_ADDRESS + 32, (((POSITION_01 * 1) >> 8)  & 0xFF)},
+  {CV_USER_ADDRESS + 33, ((POSITION_01 * 1) & 0xFF)},
+// rear position steps
+  {CV_USER_ADDRESS + 34, (((POSITION_01 * 1 + HALF_TURN_STEPS) >> 8)  & 0xFF)},
+  {CV_USER_ADDRESS + 35, ((POSITION_01 * 1 + HALF_TURN_STEPS) & 0xFF)},
+
+// track 1 defined in config.example.h others calculated by using track angle cvs.
+
+#endif
 
 
 };
