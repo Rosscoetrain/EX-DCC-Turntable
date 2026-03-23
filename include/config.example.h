@@ -19,7 +19,8 @@
 // change or add to this to define which serial to use for console output
 #define MYSERIAL Serial
 
-// uncomment to build dual motor version
+// uncomment to build dual motor version.
+// the motors do not operate together only as individual entities
 #define DUAL_MOTOR
 
 // uncomment to use nano grbl board
