@@ -231,6 +231,7 @@ void doSerialCommand(String readString)
     MYSERIAL.println(F("Track separation angle: <T [0 - 3600]>"));
 #endif
 
+    MYSERIAL.print(F("Write to CV: <W cv [0 - 255]"));
 
     MYSERIAL.println(F("Set led fast flash time: <FF mS/10>"));
     MYSERIAL.println(F("Set led slow flash time: <FS mS/10>"));
@@ -274,7 +275,7 @@ void doSerialCommand(String readString)
       MYSERIAL.print(F(" = "));
       MYSERIAL.println(Dcc.getCV(CV_29_CONFIG));
 
-      for (int i = 0; i < 16; i++)
+      for (int i = 0; i < 36; i++)
        {
         MYSERIAL.print(F("CV"));
         MYSERIAL.print(CV_USER_ADDRESS + i);
@@ -665,6 +666,64 @@ void doSerialCommand(String readString)
           delete splitter;
           splitter = NULL;
          }
+
+
+// write to CV
+        if (readString.startsWith("<W"))
+         {
+          StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
+          int itemCount = splitter->getItemCount();
+
+          if ( itemCount == 3)
+           {
+            uint8_t cv = splitter->getItemAtIndex(1).toInt();
+            uint8_t value = splitter->getItemAtIndex(2).toInt();
+
+            if ((cv >= CV_USER_ADDRESS) && (cv <= (CV_USER_ADDRESS + 40)))
+             {
+              if ((value >= 0) && (value <= 255))
+               {
+                MYSERIAL.print(F("CV : "));
+                MYSERIAL.println(cv);
+                MYSERIAL.print(F("value : "));
+                MYSERIAL.println(value);
+
+                Dcc.setCV(cv, value);
+
+               }
+              else
+               {
+                MYSERIAL.print(F("Invalid value: should be <W ["));
+                MYSERIAL.print(CV_USER_ADDRESS);
+                MYSERIAL.print(F(" - "));
+                MYSERIAL.print(CV_USER_ADDRESS + 40);
+                MYSERIAL.println(F("] [0 - 255]>"));
+               }
+              
+             }
+            else
+             {
+                MYSERIAL.print(F("Invalid CV number: should be <W ["));
+                MYSERIAL.print(CV_USER_ADDRESS);
+                MYSERIAL.print(F(" - "));
+                MYSERIAL.print(CV_USER_ADDRESS + 40);
+                MYSERIAL.println(F("] [0 - 255]>"));
+             }
+           }
+          else
+           {
+            MYSERIAL.print(F("Invalid command: should be <W ["));
+            MYSERIAL.print(CV_USER_ADDRESS);
+            MYSERIAL.print(F(" - "));
+            MYSERIAL.print(CV_USER_ADDRESS + 40);
+            MYSERIAL.println(F("] [0 - 255]>"));
+           }
+          delete splitter;
+          splitter = NULL;
+         }
+
+
+
 
 
        }

@@ -39,6 +39,9 @@ class TtMover : public AccelStepper
     TT_State state = TT_IDLE;
     uint16_t commandQueue[TT_MOVER_MAX_TRACKS + 1];
     uint16_t thisCommand, newCommand, lastCommand;
+    uint16_t minCommand = CMD_GOTO_1_CW, maxCommand = CMD_GOTO_48_ACW;
+    uint8_t turntableType = TURNTABLE;
+
     byte target, track, lastTrack;
     byte direction, lastDirection;
     uint16_t Addr;
@@ -96,6 +99,7 @@ class TtMover : public AccelStepper
     void setInvert(bool d, bool s, bool e);
 
     void setTrackOne(uint8_t mf, uint8_t lf, uint8_t mb, uint8_t lb);
+    void setTurntableType(uint8_t t);
     void setFullTurnSteps(uint8_t m, uint8_t l);
     uint16_t getFullTurnSteps();
     void setTrackAngle(uint8_t m, uint8_t l);

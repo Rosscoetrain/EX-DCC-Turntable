@@ -34,9 +34,13 @@
 //  1 = TRAVERSER : Use this for vertical or horizontal traversers, or turntables that do
 //              do not rotate a full 360 degrees.
 // 
-#define TURNTABLE_EX_MODE 0 // TURNTABLE
-//#define TURNTABLE_EX_MODE 1 // TRAVERSER
+#define TURNTABLE_EX_MODE TURNTABLE
+//#define TURNTABLE_EX_MODE TRAVERSER
 
+#ifdef DUAL_MOTOR
+#define TURNTABLE_2_EX_MODE TURNTABLE
+//#define TURNTABLE_2_EX_MODE TRAVERSER
+#endif
 
 /*
  * these are configs for the stepper

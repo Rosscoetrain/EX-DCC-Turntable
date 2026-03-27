@@ -68,6 +68,8 @@ void setup()
   ttMover.setFullTurnSteps(Dcc.getCV(CV_USER_ADDRESS + 2), Dcc.getCV(CV_USER_ADDRESS + 3));
   ttMover.setTrackAngle(Dcc.getCV(CV_USER_ADDRESS + 4), Dcc.getCV(CV_USER_ADDRESS + 5));
 
+  ttMover.setTurntableType(CV_USER_ADDRESS + 8);
+
 #ifdef DUAL_MOTOR
   ttMover2.setHomeLimitPin(HOME_SENSOR_2_PIN, LIMIT_SENSOR_2_PIN);
   ttMover2.setInvert(INVERT_DIRECTION_2, INVERT_STEP_2, INVERT_ENABLE_2);
@@ -78,10 +80,14 @@ void setup()
   ttMover2.setTrackOne(Dcc.getCV(CV_USER_ADDRESS + 32), Dcc.getCV(CV_USER_ADDRESS + 33), Dcc.getCV(CV_USER_ADDRESS + 34), Dcc.getCV(CV_USER_ADDRESS + 35));
   ttMover2.setFullTurnSteps(Dcc.getCV(CV_USER_ADDRESS + 22), Dcc.getCV(CV_USER_ADDRESS + 23));
   ttMover2.setTrackAngle(Dcc.getCV(CV_USER_ADDRESS + 24), Dcc.getCV(CV_USER_ADDRESS + 25));
+
+  ttMover2.setTurntableType(CV_USER_ADDRESS + 9);
+
 #endif
 
 #if TURNTABLE_EX_MODE == TRAVERSER
   ttMover.setNumOfTracks(Dcc.getCV(CV_USER_ADDRESS + 8));
+  ttMover2.setNumOfTracks(Dcc.getCV(CV_USER_ADDRESS + 9));
 #endif
 
 

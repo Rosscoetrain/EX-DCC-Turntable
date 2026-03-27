@@ -122,8 +122,10 @@ TT_State TtMover::process(void)
        }
 
 
+  
+  // TODO need to modify this for TRAVERSER
   //GoTo commands
-      if (( CMD_GOTO_1_CW <= this->thisCommand ) && ( this->thisCommand <= CMD_GOTO_48_ACW ))
+      if (( this->thisCommand >= this->minCommand ) && ( this->thisCommand <= maxCommand ))
        {
         this->lastCommand = this->thisCommand;
         this->lastDirection = this->direction;
@@ -133,13 +135,21 @@ TT_State TtMover::process(void)
           MYSERIAL.print(F("Moving to "));
           MYSERIAL.print(this->direction ? F("Front") : F("Back"));
           MYSERIAL.print(F(" Position: "));
-          MYSERIAL.print(this->Addr, DEC);
-          MYSERIAL.print(F(" @ Step: "));
+          MYSERIAL.println(this->Addr, DEC);
          }
 
         this->enableOutputs();
 
         uint16_t angleSteps = this->fullTurnSteps / this->numOfTracks;
+        if (this->debug)
+         {
+          MYSERIAL.print(F("fullTurnSteps : "));
+          MYSERIAL.print(fullTurnSteps);
+          MYSERIAL.print(F(" numOfTracks : "));
+          MYSERIAL.println(numOfTracks);
+          MYSERIAL.print(F("ANGLE STEPS : "));
+          MYSERIAL.println(angleSteps);
+         }
 
         uint16_t newStep;
         if (this->direction)
@@ -153,6 +163,7 @@ TT_State TtMover::process(void)
 
         if (this->debug)
          {
+          MYSERIAL.print(F(" @ Step: "));
           MYSERIAL.print(newStep, DEC);
           MYSERIAL.print(F("  Last Step: "));
           MYSERIAL.print(lastStep, DEC);
@@ -314,7 +325,9 @@ TT_State TtMover::process(void)
 //        MYSERIAL.print("interval: ");MYSERIAL.println(this->interval);
        }
 
-      if ( ( this->thisCommand >= CMD_GOTO_1_CW ) && ( this->thisCommand <= CMD_GOTO_48_ACW ) )
+
+// TODO modify this for TRAVERSER
+      if ( ( this->thisCommand >= this->minCommand ) && ( this->thisCommand <= this->maxCommand ) )
        {
         if ( ( millis() - this->startMs ) > this->interval)
          {
@@ -582,6 +595,11 @@ void TtMover::setPhase(bool phase)
  }
 
 
+void TtMover::setTurntableType(uint8_t t)
+ {
+  this->turntableType = t;
+ }
+
 // The calibration function is used to determine the number of steps required for a single 360 degree rotation,
 // or, in traverser mode, the steps between the home and limit switches.
 // This should only be trigged when either there are no stored steps in EEPROM, the stored steps are invalid,
@@ -731,7 +749,7 @@ uint16_t TtMover::calibrate()
    }
 
  	this->moveTo(SANITY_STEPS);
-  while ((digitalRead(LIMIT_SENSOR_PIN) != LIMIT_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
+  while ((digitalRead(limitPin) != LIMIT_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
    {
     this->run();
     tempSteps = this->currentPosition();
@@ -741,7 +759,7 @@ uint16_t TtMover::calibrate()
      }
    }
 
-  if (digitalRead(LIMIT_SENSOR_PIN) == LIMIT_SENSOR_ACTIVE_STATE)
+  if (digitalRead(limitPin) == LIMIT_SENSOR_ACTIVE_STATE)
    {
     MYSERIAL.println(F("Calibration complete"));
     MYSERIAL.print(F("Full steps : "));

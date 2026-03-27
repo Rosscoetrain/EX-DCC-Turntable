@@ -73,8 +73,17 @@ CVPair FactoryDefaultCVs [] =
   {CV_ACCESSORY_DECODER_WAIT_TIME, 5},
   {CV_29_CONFIG, CV29_ACCESSORY_DECODER},
 
+
+// TURNTABLE_EX_MODE motor 1
+// 0x00 = TURNTABLE
+// 0x01 = TRAVERSER
   {CV_USER_ADDRESS, 0x00},
+
+// TURNTABLE_2_EX_MODE motor 2
+// 0x00 = TURNTABLE
+// 0x01 = TRAVERSER
   {CV_USER_ADDRESS + 1, 0x00},
+
 
 // full turn steps
 // FULL_TURN_STEPS
@@ -101,13 +110,16 @@ CVPair FactoryDefaultCVs [] =
   {CV_USER_ADDRESS + 7, 50},
 
 // number of tracks in traverser mode
+// motor 1
+// motor 2
 #if TURNTABLE_EX_MODE == TRAVERSER
   {CV_USER_ADDRESS + 8, 0x05},
+  {CV_USER_ADDRESS + 9, 0x05},
 #else
   {CV_USER_ADDRESS + 8, 0x00},
+  {CV_USER_ADDRESS + 9, 0x00},
 #endif
 
-  {CV_USER_ADDRESS + 9, 0x00},
   {CV_USER_ADDRESS + 10, 0x00},
   {CV_USER_ADDRESS + 11, 0x00},
 

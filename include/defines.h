@@ -270,7 +270,7 @@
 #define EXT2_PIN 10
 #ifdef DUAL_MOTOR
 #define HOME_SENSOR_2_PIN 11
-#define LIMIT_SENSOR_2_PIN 12
+#define LIMIT_SENSOR_2_PIN A4
 #else
 #define EXT3_PIN 11
 #define EXT4_PIN 12
