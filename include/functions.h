@@ -97,7 +97,39 @@ void setVersion() {
 
 void(* resetFunc) (void) = 0;//declare reset function at address 0
 
+/*
+ * blink the led on pin 6 to show acknowledge
+ */
 
+void blinkAck(int b = 1)
+ {
+  for (int i = 0; i <=b; i++)
+   {
+    digitalWrite(LED_PIN, HIGH);
+    delay(100);
+    digitalWrite(LED_PIN, LOW);
+    delay(100);
+   }
+ }
+
+
+/*
+ * show the user CVs
+ */
+
+void showUserCVs()
+ {
+  for (int i = 0; i < 16; i++)
+   {
+    MYSERIAL.print(F("CV"));
+    MYSERIAL.print(CV_USER_ADDRESS + i);
+    MYSERIAL.print(F(" = "));
+    MYSERIAL.print(Dcc.getCV(CV_USER_ADDRESS + i));
+    MYSERIAL.print("    ");
+
+    MYSERIAL.println();
+   }
+ }
 
 /*
  * process serial commands
@@ -213,6 +245,8 @@ void doSerialCommand(String readString)
       MYSERIAL.print(F(" = "));
       MYSERIAL.println(Dcc.getCV(CV_29_CONFIG));
 
+      showUserCVs();
+/*
       for (int i = 0; i < 16; i++)
        {
         MYSERIAL.print(F("CV"));
@@ -220,6 +254,7 @@ void doSerialCommand(String readString)
         MYSERIAL.print(F(" = "));
         MYSERIAL.println(Dcc.getCV(CV_USER_ADDRESS + i));
        }
+*/
 
      }
     else
@@ -607,25 +642,64 @@ void notifyCVAck(void)
 #endif
 
 
-#ifdef NOTIFY_DCC_MSG
-void notifyDccMsg( DCC_MSG * Msg)
+void notifyDccMsg(DCC_MSG *Msg)
  {
-  if ((Msg->Data[0] == 0xFF) && (Msg->Data[1] == 0x00) && (Msg->Data[2] == 0xFF))
-   {
+// ignore idle messages and service mode reset
 
-   }
-  else
+  if (Msg->Data[0] == 0xFF || Msg->Data[0] == 0x7F || Msg->Data[0] == 0x00)
    {
-    MYSERIAL.print("notifyDccMsg: ");
+    return;
+   }
+
+  #ifdef NOTIFY_DCC_MSG
+    MYSERIAL.print("notifyDccMsg: ") ;
     for(uint8_t i = 0; i < Msg->Size; i++)
      {
       MYSERIAL.print(Msg->Data[i], HEX);
       MYSERIAL.write(' ');
      }
     MYSERIAL.println();
+  #endif
+
+// 1. Service Mode CV Write (Pattern 0x70)
+  if ((Msg->Data[0] & 0xF0) == 0x70)
+   {
+    uint16_t cv = (((Msg->Data[0] & 0x03) << 8) | Msg->Data[1]) + 1;
+    uint8_t val = Msg->Data[2];
+    Dcc.setCV(cv, val);
+    BaseTurnoutAddress = Dcc.getAddr();
+   }
+
+// 2. POM (Programming on Main) (Pattern 0xE0)
+  if (Msg->Size >= 4)
+   {
+    if (Msg->Data[0] == BaseTurnoutAddress)
+     {
+      if ((Msg->Data[1] & 0xF0) == 0xE0)
+       {
+        uint16_t cv = (((Msg->Data[1] & 0x03) << 8) | Msg->Data[2]) + 1;
+        uint8_t val = Msg->Data[3];
+#ifdef NOTIFY_DCC_MSG
+        MYSERIAL.print("CV : ");
+        MYSERIAL.print(cv);
+        MYSERIAL.print(" value : ");
+        MYSERIAL.println(val);
+#endif
+        if ((cv == 8) && (val == 8))
+         {
+#ifdef ENABLE_SERIAL
+          MYSERIAL.println(F("Reset factory default CVs"));
+#endif
+          blinkAck(5);
+          notifyCVResetFactoryDefault();
+          return;
+         }
+        Dcc.setCV(cv, val);
+        BaseTurnoutAddress = Dcc.getAddr();
+       }
+     }
    }
  }
-#endif
 
 
 

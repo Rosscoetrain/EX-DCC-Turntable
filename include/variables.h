@@ -63,7 +63,7 @@ struct CVPair
  */
 
 CVPair FactoryDefaultCVs [] =
-{
+ {
   {CV_ACCESSORY_DECODER_ADDRESS_LSB, 50},
   {CV_ACCESSORY_DECODER_ADDRESS_MSB, 0},
   {CV_ACCESSORY_DECODER_WAIT_TIME, 5},
@@ -119,6 +119,6 @@ CVPair FactoryDefaultCVs [] =
 // track 1 defined in config.example.h others calculated by using track angle cvs.
 
 
-};
+ };
 
 #endif

@@ -1,7 +1,7 @@
 /*
  * TtMover.cpp
  * 
- * A class to control the Marklin 7186 turntable
+ * A class to control a stepper motor turntable
  * 
  */
 

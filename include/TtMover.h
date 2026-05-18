@@ -1,7 +1,7 @@
 /*
  * @file Ttmover.h
  * 
- * A class to control the Marklin 7186 Turntable
+ * A class to control a stepper motor Turntable
  * 
  */
 
