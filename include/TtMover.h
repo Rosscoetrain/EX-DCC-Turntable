@@ -39,6 +39,9 @@ class TtMover : public AccelStepper
     TT_State state = TT_IDLE;
     uint16_t commandQueue[TT_MOVER_MAX_TRACKS + 1];
     uint16_t thisCommand, newCommand, lastCommand;
+    uint16_t minCommand = CMD_GOTO_1_CW, maxCommand = CMD_GOTO_48_ACW;
+    uint8_t turntableType = TURNTABLE;
+
     byte target, track, lastTrack;
     byte direction, lastDirection;
     uint16_t Addr;
@@ -68,12 +71,22 @@ class TtMover : public AccelStepper
     uint16_t phaseSwitchStartSteps = 0;
     uint16_t phaseSwitchStopSteps = 0;
 
+    bool dirInvert = false;
+    bool stepInvert = false;
+    bool enableInvert = false;
+
+
+    uint8_t homePin;
+    uint8_t limitPin;
+  
     bool debug = false;                 // this will only display debug messages in TtMover class
 
 
 
   public:
-    TtMover();
+    TtMover(uint8_t interface = AccelStepper::DRIVER, uint8_t pin1 = TMC2209_STEP_PIN, uint8_t pin2 = TMC2209_DIRECTION_PIN,
+      uint8_t pin3 = 0, uint8_t pin4 = 0, bool enable =false);
+
     void init(uint16_t interval);
     uint16_t addCommand(uint16_t command);
     TT_State process(void);
@@ -82,7 +95,11 @@ class TtMover : public AccelStepper
 
     void setDebug(bool d);
 
+    void setHomeLimitPin(uint8_t home, uint8_t limit = 0);
+    void setInvert(bool d, bool s, bool e);
+
     void setTrackOne(uint8_t mf, uint8_t lf, uint8_t mb, uint8_t lb);
+    void setTurntableType(uint8_t t);
     void setFullTurnSteps(uint8_t m, uint8_t l);
     uint16_t getFullTurnSteps();
     void setTrackAngle(uint8_t m, uint8_t l);

@@ -19,19 +19,59 @@
 // change or add to this to define which serial to use for console output
 #define MYSERIAL Serial
 
+// uncomment to build dual motor version.
+// the motors do not operate together only as individual entities
+#define DUAL_MOTOR
+
+// uncomment to use nano grbl board
+#define GRBL
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////
 //  Define the mode for turntable or traverser
 //  0 = TURNTABLE : Use this for normal, 360 degree rotation turntables (Default).
 //  1 = TRAVERSER : Use this for vertical or horizontal traversers, or turntables that do
 //              do not rotate a full 360 degrees.
 // 
-#define TURNTABLE_EX_MODE 0 // TURNTABLE
-//#define TURNTABLE_EX_MODE 1 // TRAVERSER
+#define TURNTABLE_EX_MODE TURNTABLE
+//#define TURNTABLE_EX_MODE TRAVERSER
 
+#ifdef DUAL_MOTOR
+#define TURNTABLE_2_EX_MODE TURNTABLE
+//#define TURNTABLE_2_EX_MODE TRAVERSER
+#endif
 
 /*
  * these are configs for the stepper
  */
+
+// When using a two wire driver (eg. A4988, DRV8825, TMC2208), it may be necessary to invert
+// the direction pin. This is likely required when using a TMC2208 and TMC2209
+#define INVERT_DIRECTION false
+// 
+// When using a two wire driver (eg. A4988, DRV8825, TMC2208), it may be necessary to invert
+// the step pin. If so, uncomment this line.
+#define INVERT_STEP false
+// 
+// When using a two wire driver (eg. A4988, DRV8825, TMC2208), it may be necessary to invert
+// the enable pin behaviour if you wish to have the stepper driver disabled when not moving.
+#define INVERT_ENABLE true
+
+#ifdef DUAL_MOTOR
+// When using a two wire driver (eg. A4988, DRV8825, TMC2208), it may be necessary to invert
+// the direction pin. This is likely required when using a TMC2208 and TMC2209
+#define INVERT_DIRECTION true
+// 
+// When using a two wire driver (eg. A4988, DRV8825, TMC2208), it may be necessary to invert
+// the step pin. If so, uncomment this line.
+#define INVERT_STEP false
+// 
+// When using a two wire driver (eg. A4988, DRV8825, TMC2208), it may be necessary to invert
+// the enable pin behaviour if you wish to have the stepper driver disabled when not moving.
+#define INVERT_ENABLE true
+#endif
+
 
  // The line below defines the number of "Full Steps" your stepper motor does for a full rotation
 #define MOTOR_FULL_STEPS_PER_REVOLUTION 200

@@ -58,6 +58,40 @@ void setCommand(uint16_t Addr, uint8_t Direction, uint8_t OutputPower)
 
      }
 
+#ifdef DUAL_MOTOR
+    if(( Addr >= BaseTurnoutAddress + NUM_COMMANDS ) && ( Addr < (BaseTurnoutAddress + NUM_COMMANDS + NUM_COMMANDS )) && OutputPower )
+     {
+//      if (debug)
+//       {
+#ifdef DEBUG_MSG_1
+        MYSERIAL.print(F("addr: "));MYSERIAL.println(Addr);
+        MYSERIAL.print(F("baseTurnoutAddr: "));MYSERIAL.println(BaseTurnoutAddress);
+        MYSERIAL.print(F("before addr: "));
+        MYSERIAL.println(Addr);
+        MYSERIAL.print(F("NUM_COMMANDS : "));
+        MYSERIAL.println(NUM_COMMANDS);
+        MYSERIAL.print(F("NUM_COMMANDS * 2 : "));
+        MYSERIAL.println(NUM_COMMANDS + NUM_COMMANDS);
+#endif
+//       }
+
+// Direction = 1 move clockwise
+// Direction = 0 move anti-clockwise
+
+      thisCommand = (((Addr - (BaseTurnoutAddress + NUM_COMMANDS)) * 10) + 1) + Direction;
+
+      ttMover2.addCommand(thisCommand);
+
+#ifdef DEBUG_MSG_1
+      MYSERIAL.println("");
+      MYSERIAL.print("ndato thisCommand: ");
+      MYSERIAL.println(thisCommand,DEC);
+#endif
+
+     }
+
+#endif
+
    }
 
 #ifdef  NOTIFY_TURNOUT_MSG
@@ -156,7 +190,6 @@ void doSerialCommand(String readString)
   if (readString == "<F>")
    {
     MYSERIAL.println(F("Reset factory default CVs. Reset <Z> decoder next"));
-
     notifyCVResetFactoryDefault();
    }
 
@@ -182,8 +215,20 @@ void doSerialCommand(String readString)
 
       MYSERIAL.println(F("<Z> to reset and activate new settings"));
      }
-   }
+#ifdef DUAL_MOTOR
+    fts = ttMover2.calibrate();
+    if (fts)
+     {
+      MYSERIAL.print(F("Changing motor 2 full revolution steps to "));
+      MYSERIAL.println(fts);
 
+      Dcc.setCV(CV_USER_ADDRESS + 22, ((fts >> 8) & 0xFF));
+      Dcc.setCV(CV_USER_ADDRESS + 23, fts & 0xFF);
+
+      MYSERIAL.println(F("<Z> to reset and activate new settings"));
+     }
+#endif
+   }
 
 
   if (readString == "<?>")
@@ -196,12 +241,29 @@ void doSerialCommand(String readString)
 
 //    MYSERIAL.print(F("Turn on (1) off (0) Extra: <E [1 - 6] [0,1]"));
 
+#ifdef DUAL_MOTOR
+    MYSERIAL.print(F("Move motor 1 to a track: <M1 [1 - "));
+    MYSERIAL.print(NUM_TRACKS);
+    MYSERIAL.println(F("]>"));
+    MYSERIAL.print(F("Move motor 2 to a track: <M2 [1 - "));
+    MYSERIAL.print(NUM_TRACKS);
+    MYSERIAL.println(F("]>"));
+
+    MYSERIAL.println(F("Move motor 1 this number of steps: <S1 (-)steps>"));
+    MYSERIAL.println(F("Move motor 2 this number of steps: <S2 (-)steps>"));
+
+    MYSERIAL.println(F("Motor 1 track separation angle: <TA1 [0 - 3600]>"));
+    MYSERIAL.println(F("Motor 2 track separation angle: <TA2 [0 - 3600]>"));
+#else
     MYSERIAL.print(F("Move to a track: <M [1 - "));
     MYSERIAL.print(NUM_TRACKS);
     MYSERIAL.println(F("]>"));
 
     MYSERIAL.println(F("Move this number of steps: <S (-)steps>"));
     MYSERIAL.println(F("Track separation angle: <T [0 - 3600]>"));
+#endif
+
+    MYSERIAL.print(F("Write to CV: <W cv [0 - 255]"));
 
     MYSERIAL.println(F("Set led fast flash time: <FF mS/10>"));
     MYSERIAL.println(F("Set led slow flash time: <FS mS/10>"));
@@ -245,9 +307,13 @@ void doSerialCommand(String readString)
       MYSERIAL.print(F(" = "));
       MYSERIAL.println(Dcc.getCV(CV_29_CONFIG));
 
+<<<<<<< HEAD
       showUserCVs();
 /*
       for (int i = 0; i < 16; i++)
+=======
+      for (int i = 0; i < 36; i++)
+>>>>>>> 518d2a6c658d089d8c37d0403496218a47ab379a
        {
         MYSERIAL.print(F("CV"));
         MYSERIAL.print(CV_USER_ADDRESS + i);
@@ -265,7 +331,11 @@ void doSerialCommand(String readString)
 
         // command to move to track <M track>
 
+#ifdef DUAL_MOTOR
+        if (readString.startsWith("<M1"))
+#else
         if (readString.startsWith("<M"))
+#endif
          {
 
           StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
@@ -287,12 +357,47 @@ void doSerialCommand(String readString)
            }
           else
            {
-                        MYSERIAL.println(F("Invalid command: should be <M track>"));
+#ifdef DUAL_MOTOR
+            MYSERIAL.println(F("Invalid command: should be <M1 track>"));
+#else
+            MYSERIAL.println(F("Invalid command: should be <M track>"));
+#endif
            }
           delete splitter;
           splitter = NULL;
 
          }
+
+#ifdef DUAL_MOTOR
+        if (readString.startsWith("<M2"))
+         {
+          StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
+          int itemCount = splitter->getItemCount();
+
+          if ( itemCount == 2)
+           {
+            int addr = splitter->getItemAtIndex(1).toInt();
+
+            if ((addr > 0) && (addr <= NUM_TRACKS))
+             {
+              notifyDccAccTurnoutOutput( BaseTurnoutAddress + NUM_COMMANDS + addr - 1, 1, 1 );
+             }
+            else
+             {
+              MYSERIAL.println(F("Invalid track number"));
+             }
+
+           }
+          else
+           {
+            MYSERIAL.println(F("Invalid command: should be <M2 track>"));
+           }
+          delete splitter;
+          splitter = NULL;
+         }
+#endif
+
+
 
 // command to activate led, acc or ext outputs
 // <E p 0/1>
@@ -379,7 +484,6 @@ void doSerialCommand(String readString)
          {
           StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
           int itemCount = splitter->getItemCount();
-
 
           if ( itemCount == 2)
            {
@@ -601,6 +705,64 @@ void doSerialCommand(String readString)
           delete splitter;
           splitter = NULL;
          }
+
+
+// write to CV
+        if (readString.startsWith("<W"))
+         {
+          StringSplitter *splitter = new StringSplitter(readString, ' ', 3);  // new StringSplitter(string_to_split, delimiter, limit)
+          int itemCount = splitter->getItemCount();
+
+          if ( itemCount == 3)
+           {
+            uint8_t cv = splitter->getItemAtIndex(1).toInt();
+            uint8_t value = splitter->getItemAtIndex(2).toInt();
+
+            if ((cv >= CV_USER_ADDRESS) && (cv <= (CV_USER_ADDRESS + 40)))
+             {
+              if ((value >= 0) && (value <= 255))
+               {
+                MYSERIAL.print(F("CV : "));
+                MYSERIAL.println(cv);
+                MYSERIAL.print(F("value : "));
+                MYSERIAL.println(value);
+
+                Dcc.setCV(cv, value);
+
+               }
+              else
+               {
+                MYSERIAL.print(F("Invalid value: should be <W ["));
+                MYSERIAL.print(CV_USER_ADDRESS);
+                MYSERIAL.print(F(" - "));
+                MYSERIAL.print(CV_USER_ADDRESS + 40);
+                MYSERIAL.println(F("] [0 - 255]>"));
+               }
+              
+             }
+            else
+             {
+                MYSERIAL.print(F("Invalid CV number: should be <W ["));
+                MYSERIAL.print(CV_USER_ADDRESS);
+                MYSERIAL.print(F(" - "));
+                MYSERIAL.print(CV_USER_ADDRESS + 40);
+                MYSERIAL.println(F("] [0 - 255]>"));
+             }
+           }
+          else
+           {
+            MYSERIAL.print(F("Invalid command: should be <W ["));
+            MYSERIAL.print(CV_USER_ADDRESS);
+            MYSERIAL.print(F(" - "));
+            MYSERIAL.print(CV_USER_ADDRESS + 40);
+            MYSERIAL.println(F("] [0 - 255]>"));
+           }
+          delete splitter;
+          splitter = NULL;
+         }
+
+
+
 
 
        }

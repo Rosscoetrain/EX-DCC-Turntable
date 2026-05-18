@@ -11,7 +11,10 @@
 
 #define TT_MOVER_SLOT_EMPTY 511
 
-TtMover::TtMover() : AccelStepper(AccelStepper::DRIVER, TMC2209_STEP_PIN, TMC2209_DIRECTION_PIN, 0, 0, false){};
+
+//TtMover::TtMover() : AccelStepper(AccelStepper::DRIVER, TMC2209_STEP_PIN, TMC2209_DIRECTION_PIN, 0, 0, false){};
+TtMover::TtMover(uint8_t interface, uint8_t pin1, uint8_t pin2,
+      uint8_t pin3, uint8_t pin4, bool enable) : AccelStepper(interface, pin1, pin2, pin3, pin4, enable){};
 
 void TtMover::init(uint16_t interval)
  {
@@ -56,9 +59,14 @@ uint16_t TtMover::addCommand(uint16_t command)
       {
         MYSERIAL.print(" commandQueue Index: "); MYSERIAL.println(i,DEC);
       }
-
       this->commandQueue[i] = command;
       this->process();
+
+#ifdef DEBUG_MSG_1
+        MYSERIAL.print(F("command : "));
+        MYSERIAL.println(command);
+#endif
+
       return i;
     }
   }  
@@ -114,8 +122,10 @@ TT_State TtMover::process(void)
        }
 
 
+  
+  // TODO need to modify this for TRAVERSER
   //GoTo commands
-      if (( CMD_GOTO_1_CW <= this->thisCommand ) && ( this->thisCommand <= CMD_GOTO_48_ACW ))
+      if (( this->thisCommand >= this->minCommand ) && ( this->thisCommand <= maxCommand ))
        {
         this->lastCommand = this->thisCommand;
         this->lastDirection = this->direction;
@@ -125,13 +135,21 @@ TT_State TtMover::process(void)
           MYSERIAL.print(F("Moving to "));
           MYSERIAL.print(this->direction ? F("Front") : F("Back"));
           MYSERIAL.print(F(" Position: "));
-          MYSERIAL.print(this->Addr, DEC);
-          MYSERIAL.print(F(" @ Step: "));
+          MYSERIAL.println(this->Addr, DEC);
          }
 
         this->enableOutputs();
 
         uint16_t angleSteps = this->fullTurnSteps / this->numOfTracks;
+        if (this->debug)
+         {
+          MYSERIAL.print(F("fullTurnSteps : "));
+          MYSERIAL.print(fullTurnSteps);
+          MYSERIAL.print(F(" numOfTracks : "));
+          MYSERIAL.println(numOfTracks);
+          MYSERIAL.print(F("ANGLE STEPS : "));
+          MYSERIAL.println(angleSteps);
+         }
 
         uint16_t newStep;
         if (this->direction)
@@ -145,6 +163,7 @@ TT_State TtMover::process(void)
 
         if (this->debug)
          {
+          MYSERIAL.print(F(" @ Step: "));
           MYSERIAL.print(newStep, DEC);
           MYSERIAL.print(F("  Last Step: "));
           MYSERIAL.print(lastStep, DEC);
@@ -267,7 +286,8 @@ TT_State TtMover::process(void)
         case CMD_EXT2_OFF:                         // 
           digitalWrite(EXT2_PIN, LOW);
           break;
-        case CMD_EXT3_ON:                         // 
+#ifndef DUAL_MOTOR
+          case CMD_EXT3_ON:                         // 
           digitalWrite(EXT3_PIN, HIGH);
           break;
         case CMD_EXT3_OFF:                         // 
@@ -279,6 +299,7 @@ TT_State TtMover::process(void)
         case CMD_EXT4_OFF:                         // 
           digitalWrite(EXT4_PIN, LOW);
           break;
+#endif
         default:
           break;
        }
@@ -304,7 +325,9 @@ TT_State TtMover::process(void)
 //        MYSERIAL.print("interval: ");MYSERIAL.println(this->interval);
        }
 
-      if ( ( this->thisCommand >= CMD_GOTO_1_CW ) && ( this->thisCommand <= CMD_GOTO_48_ACW ) )
+
+// TODO modify this for TRAVERSER
+      if ( ( this->thisCommand >= this->minCommand ) && ( this->thisCommand <= this->maxCommand ) )
        {
         if ( ( millis() - this->startMs ) > this->interval)
          {
@@ -350,21 +373,27 @@ TT_State TtMover::process(void)
   return this->state;
  }
 
+void TtMover::setHomeLimitPin(uint8_t home, uint8_t limit)
+ {
+  this->homePin = home;
+  this->limitPin = limit;
+ }
+
 
 void TtMover::setupPins()
  {
 #if (HOME_SENSOR_ACTIVE_STATE == LOW)
-  pinMode(HOME_SENSOR_PIN, INPUT_PULLUP);
+  pinMode(this->homePin, INPUT_PULLUP);
 #else
-  pinMode(HOME_SENSOR_PIN, INPUT);
+  pinMode(this->homePin, INPUT);
 #endif
 
 #if TURNTABLE_EX_MODE == TRAVERSER
 // Configure limit sensor pin in traverser mode
 #if LIMIT_SENSOR_ACTIVE_STATE == LOW
-//  pinMode(LIMIT_SENSOR_PIN, INPUT_PULLUP);
+//  pinMode(this->limitPin, INPUT_PULLUP);
 #elif LIMIT_SENSOR_ACTIVE_STATE == HIGH
-//  pinMode(LIMIT_SENSOR_PIN, INPUT);
+//  pinMode(this->limitPin, INPUT);
 #endif
 #endif
 
@@ -372,19 +401,31 @@ void TtMover::setupPins()
   pinMode(ACC_PIN, OUTPUT);
   pinMode(EXT1_PIN, OUTPUT);
   pinMode(EXT2_PIN, OUTPUT);
+#ifndef DUAL_MOTOR
   pinMode(EXT3_PIN, OUTPUT);
   pinMode(EXT4_PIN, OUTPUT);
+#endif
   pinMode(RELAY_PIN, OUTPUT);
 
   digitalWrite(LED_PIN, LOW);
   digitalWrite(ACC_PIN, LOW);
   digitalWrite(EXT1_PIN, LOW);
   digitalWrite(EXT2_PIN, LOW);
+#ifndef DUAL_MOTOR
   digitalWrite(EXT3_PIN, LOW);
   digitalWrite(EXT4_PIN, LOW);
-
+#endif
 // setPhase and RELAY_PIN to off
 //  setPhase(0);
+
+ }
+
+
+void TtMover::setInvert(bool d = false, bool s = false, bool e = false)
+ {
+  this->dirInvert = d;
+  this->stepInvert = s;
+  this->enableInvert = e;
 
  }
 
@@ -392,7 +433,7 @@ void TtMover::setupPins()
 void TtMover::setupStepper()
  {
   this->setEnablePin(TMC2209_ENABLE_PIN);
-  this->setPinsInverted(false, false, true);
+  this->setPinsInverted(this->dirInvert, this->stepInvert, this-enableInvert);
 
   this->enableOutputs();
 
@@ -408,11 +449,11 @@ void TtMover::moveToHome()
    {
     MYSERIAL.println("Finding home ...");
     MYSERIAL.print("Home sensor : ");
-    MYSERIAL.println(digitalRead(HOME_SENSOR_PIN));
+    MYSERIAL.println(digitalRead(this->homePin));
    }
 
 
-  if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+  if (digitalRead(this->homePin) == HOME_SENSOR_ACTIVE_STATE)
    {
     MYSERIAL.println("Move off home");
     this->moveTo(HOME_SENSITIVITY);
@@ -423,7 +464,7 @@ void TtMover::moveToHome()
    }
   
 
-  if (digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE)
+  if (digitalRead(this->homePin) != HOME_SENSOR_ACTIVE_STATE)
    {
 
     MYSERIAL.print(F("Homing "));
@@ -437,7 +478,7 @@ void TtMover::moveToHome()
     MYSERIAL.println(F(" ..."));
    }
 
-  while (digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE)
+  while (digitalRead(this->homePin) != HOME_SENSOR_ACTIVE_STATE)
     this->run();
 
   this->disableOutputs();
@@ -554,6 +595,11 @@ void TtMover::setPhase(bool phase)
  }
 
 
+void TtMover::setTurntableType(uint8_t t)
+ {
+  this->turntableType = t;
+ }
+
 // The calibration function is used to determine the number of steps required for a single 360 degree rotation,
 // or, in traverser mode, the steps between the home and limit switches.
 // This should only be trigged when either there are no stored steps in EEPROM, the stored steps are invalid,
@@ -575,7 +621,7 @@ uint16_t TtMover::calibrate()
   this->enableOutputs();
 
 #if TURNTABLE_EX_MODE == TURNTABLE
-  if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+  if (digitalRead(this->homePin) == HOME_SENSOR_ACTIVE_STATE)
    {
     MYSERIAL.println(F("Homed"));
     homed = true;
@@ -584,18 +630,18 @@ uint16_t TtMover::calibrate()
 
   if (!homed)
    {
-    if (digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE)
+    if (digitalRead(this->homePin) != HOME_SENSOR_ACTIVE_STATE)
      {
       MYSERIAL.println(F("Homing ..."));
      	this->moveTo(SANITY_STEPS);
      }
 
-    while ((digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
+    while ((digitalRead(this->homePin) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
      {
       this->run();
      }
 
-    if ((digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() >= SANITY_STEPS))
+    if ((digitalRead(this->homePin) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() >= SANITY_STEPS))
      {
       MYSERIAL.println(F("Calibration incomplete"));
       MYSERIAL.println(F("Home sensor not found"));
@@ -605,7 +651,7 @@ uint16_t TtMover::calibrate()
       return 0;
      }
 
-    if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+    if (digitalRead(this->homePin) == HOME_SENSOR_ACTIVE_STATE)
      {
       MYSERIAL.println(F("Homed"));
       homed = true;
@@ -616,13 +662,13 @@ uint16_t TtMover::calibrate()
   MYSERIAL.println(F("Counting full steps"));
 
   this->moveTo(HOME_SENSITIVITY);
-  while(digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+  while(digitalRead(this->homePin) == HOME_SENSOR_ACTIVE_STATE)
    {
     this->run();
    }
 
  	this->moveTo(SANITY_STEPS);
-  while ((digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
+  while ((digitalRead(this->homePin) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
    {
     this->run();
     tempSteps = this->currentPosition();
@@ -632,7 +678,7 @@ uint16_t TtMover::calibrate()
      }
    }
 
-  if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+  if (digitalRead(this->homePin) == HOME_SENSOR_ACTIVE_STATE)
    {
     MYSERIAL.println(F("Calibration complete"));
     MYSERIAL.print(F("Full revolution steps : "));
@@ -656,7 +702,7 @@ uint16_t TtMover::calibrate()
 #endif
 
 #if TURNTABLE_EX_MODE == TRAVERSER
-  if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+  if (digitalRead(this->homePin) == HOME_SENSOR_ACTIVE_STATE)
    {
     MYSERIAL.println(F("Homed"));
     homed = true;
@@ -665,18 +711,18 @@ uint16_t TtMover::calibrate()
 
   if (!homed)
    {
-    if (digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE)
+    if (digitalRead(this->homePin) != HOME_SENSOR_ACTIVE_STATE)
      {
       MYSERIAL.println(F("Homing ..."));
      	this->moveTo(-SANITY_STEPS);
      }
 
-    while ((digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() >= -SANITY_STEPS))
+    while ((digitalRead(this->homePin) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() >= -SANITY_STEPS))
      {
       this->run();
      }
 
-    if ((digitalRead(HOME_SENSOR_PIN) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() >= -SANITY_STEPS))
+    if ((digitalRead(this->homePin) != HOME_SENSOR_ACTIVE_STATE) && (this->currentPosition() >= -SANITY_STEPS))
      {
       MYSERIAL.println(F("Calibration incomplete"));
       MYSERIAL.println(F("Home sensor not found"));
@@ -686,7 +732,7 @@ uint16_t TtMover::calibrate()
       return 0;
      }
 
-    if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+    if (digitalRead(this->homePin) == HOME_SENSOR_ACTIVE_STATE)
      {
       MYSERIAL.println(F("Homed"));
       homed = true;
@@ -697,13 +743,13 @@ uint16_t TtMover::calibrate()
   MYSERIAL.println(F("Counting full steps"));
 
   this->moveTo(HOME_SENSITIVITY);
-  while(digitalRead(HOME_SENSOR_PIN) == HOME_SENSOR_ACTIVE_STATE)
+  while(digitalRead(this->homePin) == HOME_SENSOR_ACTIVE_STATE)
    {
     this->run();
    }
 
  	this->moveTo(SANITY_STEPS);
-  while ((digitalRead(LIMIT_SENSOR_PIN) != LIMIT_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
+  while ((digitalRead(limitPin) != LIMIT_SENSOR_ACTIVE_STATE) && (this->currentPosition() <= SANITY_STEPS))
    {
     this->run();
     tempSteps = this->currentPosition();
@@ -713,7 +759,7 @@ uint16_t TtMover::calibrate()
      }
    }
 
-  if (digitalRead(LIMIT_SENSOR_PIN) == LIMIT_SENSOR_ACTIVE_STATE)
+  if (digitalRead(limitPin) == LIMIT_SENSOR_ACTIVE_STATE)
    {
     MYSERIAL.println(F("Calibration complete"));
     MYSERIAL.print(F("Full steps : "));
