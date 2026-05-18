@@ -1,7 +1,12 @@
 /*
+ *
+ *  © 2023, 2026 Ross Scanlon
+ *
  * This is an accessory decoder to control the RT_EX-Turntable board.
  * 
  * The board is available here:
+ * 
+ * https://rosscoe.com/shop/index.php?main_page=product_info&cPath=7&products_id=24
  * 
  * 
  */
