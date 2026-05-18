@@ -307,13 +307,9 @@ void doSerialCommand(String readString)
       MYSERIAL.print(F(" = "));
       MYSERIAL.println(Dcc.getCV(CV_29_CONFIG));
 
-<<<<<<< HEAD
       showUserCVs();
 /*
       for (int i = 0; i < 16; i++)
-=======
-      for (int i = 0; i < 36; i++)
->>>>>>> 518d2a6c658d089d8c37d0403496218a47ab379a
        {
         MYSERIAL.print(F("CV"));
         MYSERIAL.print(CV_USER_ADDRESS + i);

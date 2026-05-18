@@ -6,3 +6,4 @@
 .vscode/ipch
 config.h
 
+.pio/libdeps/nanoatmega328new/integrity.dat
